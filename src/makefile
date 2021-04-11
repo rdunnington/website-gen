@@ -37,4 +37,4 @@ clean:
 	rm -r main.dSYM
 
 test:
-	./$(OUTPUT_FILE) index.md index.html
+	./$(OUTPUT_FILE) ../markdown/projects.md ../projects.html

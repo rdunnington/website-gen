@@ -10,12 +10,15 @@
 enum token_type
 {
 	TOKEN_TYPE_TEXT,
-	TOKEN_TYPE_HEADER,
-	TOKEN_TYPE_LIST_ITEM,
-	TOKEN_TYPE_LINK_BEGIN,
-	TOKEN_TYPE_LINK_END,
-	TOKEN_TYPE_LINK_ADDRESS_BEGIN,
-	TOKEN_TYPE_LINK_ADDRESS_END,
+	TOKEN_TYPE_HASH,
+	TOKEN_TYPE_ASTERISK,
+	TOKEN_TYPE_SQUARE_BRACKET_OPEN,
+	TOKEN_TYPE_SQUARE_BRACKET_CLOSE,
+	TOKEN_TYPE_PAREN_OPEN,
+	TOKEN_TYPE_PAREN_CLOSE,
+	TOKEN_TYPE_ANGLE_BRACKET_OPEN,
+	TOKEN_TYPE_ANGLE_BRACKET_CLOSE,
+	TOKEN_TYPE_SLASH_FORWARD,
 	TOKEN_TYPE_COUNT,
 };
 
@@ -28,6 +31,9 @@ const char TOKEN_SYMBOLS[] =
 	']',
 	'(',
 	')',
+	'<',
+	'>',
+	'/',
 };
 RJD_STATIC_ASSERT(rjd_countof(TOKEN_SYMBOLS) == TOKEN_TYPE_COUNT);
 
@@ -41,6 +47,7 @@ struct token
 struct token_stream
 {
 	const struct token* tokens;
+	const struct token* first_header_text;
 	uint32_t cursor;
 	uint32_t indent;
 };
@@ -55,6 +62,7 @@ struct rjd_result parse_paragraph(struct rjd_strbuf* out, struct token_stream* s
 struct rjd_result parse_header(struct rjd_strbuf* out, struct token_stream* stream);
 struct rjd_result parse_list(struct rjd_strbuf* out, struct token_stream* stream);
 struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream);
+struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream);
 
 void add_indent(struct rjd_strbuf* out, const struct token_stream* stream)
 {
@@ -83,7 +91,9 @@ struct rjd_result advance_token(struct token_stream* stream)
 	if (stream->cursor >= rjd_array_count(stream->tokens)) {
 		return RJD_RESULT("end of token stream");
 	}
-	printf("advance_token: %c\n", *stream->tokens[stream->cursor].text);
+
+	const struct token* t = stream->tokens + stream->cursor;
+	printf("advance_token: %.*s\n", t->length, t->text);
 	return RJD_RESULT_OK();
 }
 
@@ -108,7 +118,7 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 				rjd_strbuf_appendl(out, t->text, t->length);
 				consuming = false;
 				break;
-			case TOKEN_TYPE_LINK_BEGIN:
+			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
 				printf("parse_text: begin parsing link\n");
 				RJD_RESULT_PROMOTE(parse_link(out, stream));
 				consuming = false;
@@ -146,14 +156,24 @@ struct rjd_result parse_header(struct rjd_strbuf* out, struct token_stream* stre
 {
 	const struct token* t = stream->tokens + stream->cursor;
 
-	RJD_ASSERT(t->type == TOKEN_TYPE_HEADER);
-	add_indent(out, stream);
-	rjd_strbuf_append(out, "<h1>");
+	RJD_ASSERT(t->type == TOKEN_TYPE_HASH);
 
-	RJD_RESULT_PROMOTE(advance_token(stream));
+	int32_t header_type = 0;
+
+	while (t->type == TOKEN_TYPE_HASH) {
+		++header_type;
+		RJD_RESULT_PROMOTE(advance_token(stream));
+		t = stream->tokens + stream->cursor;
+	}
+
+	if (stream->first_header_text == NULL) {
+		stream->first_header_text = t;
+	}
+
+	add_indent(out, stream);
+	rjd_strbuf_append(out, "<h%d>", header_type);
 	RJD_RESULT_PROMOTE(parse_text(out, stream));
-	
-	rjd_strbuf_append(out, "</h1>\n");
+	rjd_strbuf_append(out, "</h%d>\n", header_type);
 
 	return RJD_RESULT_OK();
 }
@@ -162,7 +182,7 @@ struct rjd_result parse_list(struct rjd_strbuf* out, struct token_stream* stream
 {
 	const struct token* t = stream->tokens + stream->cursor;
 
-	RJD_ASSERT(t->type == TOKEN_TYPE_LIST_ITEM);
+	RJD_ASSERT(t->type == TOKEN_TYPE_ASTERISK);
 	add_indent(out, stream);
 	rjd_strbuf_append(out, "<ul>\n");
 
@@ -178,7 +198,7 @@ struct rjd_result parse_list(struct rjd_strbuf* out, struct token_stream* stream
 		rjd_strbuf_append(out, "</li>\n");
 		stream->cursor -= 1;
 
-		if (!rjd_result_isok(consume_token(stream, TOKEN_TYPE_LIST_ITEM))) {
+		if (!rjd_result_isok(consume_token(stream, TOKEN_TYPE_ASTERISK))) {
 			break;
 		}
 	}
@@ -193,21 +213,19 @@ struct rjd_result parse_list(struct rjd_strbuf* out, struct token_stream* stream
 
 struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream)
 {
-	printf("parse_link\n");
 	const struct token* t = stream->tokens + stream->cursor;
-	RJD_ASSERT(t->type == TOKEN_TYPE_LINK_BEGIN);
+	RJD_ASSERT(t->type == TOKEN_TYPE_SQUARE_BRACKET_OPEN);
 
 	bool open_new_tab = false;
 	const struct token* text = NULL;
-	const struct token* address = NULL;
 
 	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
 	text = stream->tokens + stream->cursor;
-	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_LINK_END));
-	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_LINK_ADDRESS_BEGIN));
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_SQUARE_BRACKET_CLOSE));
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_PAREN_OPEN));
 
-	if (peek_token(stream, TOKEN_TYPE_LINK_BEGIN)) {
-		RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_LINK_BEGIN));
+	if (peek_token(stream, TOKEN_TYPE_SQUARE_BRACKET_OPEN)) {
+		RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_SQUARE_BRACKET_OPEN));
 		RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
 
 		const struct token* attribute = stream->tokens + stream->cursor;
@@ -217,17 +235,20 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 		} else {
 			return RJD_RESULT("unknown link attribute");
 		}
-		RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_LINK_END));
+		RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_SQUARE_BRACKET_CLOSE));
 	}
 
-	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
-	address = stream->tokens + stream->cursor;
-	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_LINK_ADDRESS_END));
-
-	printf("got to end of lnk parse\n");
+	RJD_RESULT_PROMOTE(advance_token(stream));
+	const struct token* text_begin = stream->tokens + stream->cursor;
+	const struct token* text_end = text_begin;
 
 	rjd_strbuf_append(out, "<a href=\"");
-	rjd_strbuf_appendl(out, address->text, address->length);
+	while (text_end->type != TOKEN_TYPE_PAREN_CLOSE)
+	{
+		rjd_strbuf_appendl(out, text_end->text, text_end->length);
+		RJD_RESULT_PROMOTE(advance_token(stream));
+		text_end = stream->tokens + stream->cursor;
+	}
 	rjd_strbuf_append(out, "\"");
 	if (open_new_tab) {
 		rjd_strbuf_append(out, " target=\"_blank\"");
@@ -236,38 +257,87 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 	rjd_strbuf_appendl(out, text->text, text->length);
 	rjd_strbuf_append(out, "</a>");
 
-	//advance_token(stream);
+	return RJD_RESULT_OK();
+}
+
+struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream)
+{
+	const struct token* t = stream->tokens + stream->cursor;
+	RJD_ASSERT(t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN);
+
+	add_indent(out, stream);
+	rjd_strbuf_appendl(out, t->text, t->length);
+
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
+	t = stream->tokens + stream->cursor;
+	//const struct token* html_tag = t;
+
+	rjd_strbuf_appendl(out, t->text, t->length);
+
+	int32_t angle_bracket_count = 1;
+	while (true)
+	{
+		RJD_RESULT_PROMOTE(advance_token(stream));
+		t = stream->tokens + stream->cursor;
+
+		rjd_strbuf_appendl(out, t->text, t->length);
+
+		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN) {
+			++angle_bracket_count;
+		}
+
+		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
+			--angle_bracket_count;
+		}
+
+		const struct token* next = NULL;
+		const struct token* next2 = NULL;
+		if (stream->cursor + 2 < rjd_array_count(stream->tokens)) {
+			next = stream->tokens + stream->cursor + 1;
+			next2 = stream->tokens + stream->cursor + 2;
+		}
+
+		if (angle_bracket_count == 1 &&
+			t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN &&
+			next && next->type == TOKEN_TYPE_SLASH_FORWARD &&
+			next2 && next2->type == TOKEN_TYPE_TEXT)
+		{
+			//strncmp(html_tag->text, next2->text, rjd_math_minu32(html_tag->length, next2->length)))
+			// found the matching end tag
+			break;
+		}
+	}
+
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_SLASH_FORWARD));
+	t = stream->tokens + stream->cursor;
+	rjd_strbuf_appendl(out, t->text, t->length);
+
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
+	t = stream->tokens + stream->cursor;
+	rjd_strbuf_appendl(out, t->text, t->length);
+
+	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_ANGLE_BRACKET_CLOSE));
+	t = stream->tokens + stream->cursor;
+	rjd_strbuf_appendl(out, t->text, t->length);
+
+	advance_token(stream);
 
 	return RJD_RESULT_OK();
 }
 
-int main(int argc, const char** argv)
+struct rjd_result transform_markdown_file(const char* mdFilepath, const char* htmlFilepath)
 {
-	if (argc < 3) {
-		printf("Usage: %s <markdown file> <output file>\n", argv[0]);
-		return 0;
-	}
-
-	const char* mdFilepath = argv[1];
-	const char* htmlFilepath = argv[2];
-
 	struct rjd_mem_allocator alloc = rjd_mem_allocator_init_default();
 
 	size_t file_size = 0;
-	struct rjd_result result = rjd_fio_size(mdFilepath, &file_size);
-	if (!rjd_result_isok(result)) {
-		printf("Failed to get file '%s' size.\n", mdFilepath);
-		return 1;
-	}
+	RJD_RESULT_PROMOTE(rjd_fio_size(mdFilepath, &file_size));
 
 	char* file_contents = NULL;
-	result = rjd_fio_read(mdFilepath, &file_contents, &alloc);
-	if (!rjd_result_isok(result)) {
-		printf("Failed to open file '%s': %s\n", mdFilepath, result.error);
-		return 1;
-	}
+	RJD_RESULT_PROMOTE(rjd_fio_read(mdFilepath, &file_contents, &alloc));
 
 	struct token* tokens = rjd_array_alloc(struct token, 4096, &alloc);
+
+	printf("a");
 
 	const char* end = file_contents + file_size;
 	for (const char* next = file_contents; next < end; )
@@ -289,27 +359,39 @@ int main(int argc, const char** argv)
 		switch (*next)
 		{
 		case '#':
-			t.type = TOKEN_TYPE_HEADER;
+			t.type = TOKEN_TYPE_HASH;
 			++next;
 			break;
 		case '*':
-			t.type = TOKEN_TYPE_LIST_ITEM;
+			t.type = TOKEN_TYPE_ASTERISK;
 			++next;
 			break;
 		case '[':
-			t.type = TOKEN_TYPE_LINK_BEGIN;
+			t.type = TOKEN_TYPE_SQUARE_BRACKET_OPEN;
 			++next;
 			break;
 		case ']':
-			t.type = TOKEN_TYPE_LINK_END;
+			t.type = TOKEN_TYPE_SQUARE_BRACKET_CLOSE;
 			++next;
 			break;
 		case '(':
-			t.type = TOKEN_TYPE_LINK_ADDRESS_BEGIN;
+			t.type = TOKEN_TYPE_PAREN_OPEN;
 			++next;
 			break;
 		case ')':
-			t.type = TOKEN_TYPE_LINK_ADDRESS_END;
+			t.type = TOKEN_TYPE_PAREN_CLOSE;
+			++next;
+			break;
+		case '<':
+			t.type = TOKEN_TYPE_ANGLE_BRACKET_OPEN;
+			++next;
+			break;
+		case '>':
+			t.type = TOKEN_TYPE_ANGLE_BRACKET_CLOSE;
+			++next;
+			break;
+		case '/':
+			t.type = TOKEN_TYPE_SLASH_FORWARD;
 			++next;
 			break;
 		default:
@@ -339,34 +421,31 @@ int main(int argc, const char** argv)
 	struct token_stream stream =
 	{
 		.tokens = tokens,
+		.first_header_text = NULL,
 		.cursor = 0,
 		.indent = 1,
 	};
 
 	while (stream.cursor < rjd_array_count(stream.tokens))
 	{
+		const struct token* t = stream.tokens + stream.cursor;
+		printf("top-level token: %.*s\n", t->length, t->text);
 
-		printf("current token: %c\n", *stream.tokens[stream.cursor].text);
+		struct rjd_result result = {0};
 
 		string.length = 0;
 		switch (stream.tokens[stream.cursor].type)
 		{
 			case TOKEN_TYPE_TEXT:
-			case TOKEN_TYPE_LINK_BEGIN:
+			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
 				result = parse_paragraph(&string, &stream);
 				break;
-			case TOKEN_TYPE_HEADER:
+			case TOKEN_TYPE_HASH:
 				result = parse_header(&string, &stream);
 				break;
-			case TOKEN_TYPE_LIST_ITEM:
+			case TOKEN_TYPE_ASTERISK:
 				result = parse_list(&string, &stream);
 				break;
-			//case TOKEN_TYPE_LINK_BEGIN:
-			//	parse_text(&string, &stream);
-			//	//add_indent(&string, &stream);
-			//	//result = parse_link(&string, &stream);
-			//	//rjd_strbuf_append(&string, "\n");
-			//	break;
 			default:
 				printf("bad token %c\n", *stream.tokens[stream.cursor].text);
 				result = RJD_RESULT("unexpected token at top level");
@@ -382,18 +461,19 @@ int main(int argc, const char** argv)
 		rjd_array_push(md_lines, rjd_strref_str(ref));
 	}
 
-	rjd_strbuf_free(&string);
-
-//	for (size_t i = 0; i < rjd_array_count(tokens); ++i)
-//	{
-//		char tmp[4096];
-//		size_t length = rjd_math_minu32(tokens[i].length, 4095);
-//		strncpy(tmp, tokens[i].text, length);
-//		tmp[length] = 0;
-//		printf("type: %d, %s\n", tokens[i].type, tmp);
-//	}
-
 	const char* titleString = "";
+	if (stream.first_header_text) {
+		const struct token* t = stream.first_header_text;
+
+		rjd_strbuf_clear(&string);
+		rjd_strbuf_append(&string, "\t<title>");
+		rjd_strbuf_appendl(&string, t->text, t->length);
+		rjd_strbuf_append(&string, " | Reuben Dunnington</title>");
+		struct rjd_strref* ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+		titleString = rjd_strref_str(ref);
+	}
+
+	rjd_strbuf_free(&string);
 
 	const char* header_lines[] = 
 	{
@@ -446,9 +526,27 @@ int main(int argc, const char** argv)
 	}
 
 	fclose(htmlFile);
+	rjd_array_free(tokens);
 	rjd_array_free(md_lines);
 	rjd_strpool_free(&strings);
 
-	return 0;
+	return RJD_RESULT_OK();
 }
 
+int main(int argc, const char** argv)
+{
+	if (argc < 3) {
+		printf("Usage: %s <markdown file> <output file>\n", argv[0]);
+		return 0;
+	}
+
+	const char* mdFilepath = argv[1];
+	const char* htmlFilepath = argv[2];
+
+	struct rjd_result r = transform_markdown_file(mdFilepath, htmlFilepath);
+	if (!rjd_result_isok(r)) {
+		printf("markdown error: %s", r.error);
+	}
+
+	return 0;
+}
