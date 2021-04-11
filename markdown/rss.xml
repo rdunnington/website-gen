@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+	<channel>
+		<title>Reuben Dunnington's Blog</title>
+		<link>http://rdunnington.github.io</link>
+		<atom:link href="http://http://rdunnington.github.io/rss.xml" rel="self" type="application/rss+xml" />
+		<description>Reuben Dunnington's personal website and technical/opinion blog.</description>
+		<language>en-us</language>
+		<item>
+			<description>Enforcing static strings in structs</description>
+			<link>https://rdunnington.github.io/blog/2020-10-14</link>
+			<guid>https://rdunnington.github.io/blog/2020-10-14</guid>
+			<pubDate>Wed, 14 Oct 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>Simple CI in Github</description>
+			<link>https://rdunnington.github.io/blog/2020-9-22</link>
+			<guid>https://rdunnington.github.io/blog/2020-9-22</guid>
+			<pubDate>Tue, 22 Sep 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>Scoped Resources in C</description>
+			<link>https://rdunnington.github.io/blog/2020-9-3</link>
+			<guid>https://rdunnington.github.io/blog/2020-9-3</guid>
+			<pubDate>Thu, 3 Sep 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>Flat Pimpl</description>
+			<link>https://rdunnington.github.io/blog/2020-7-19</link>
+			<guid>https://rdunnington.github.io/blog/2020-7-19</guid>
+			<pubDate>Sun, 19 Jul 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>George Floyd</description>
+			<link>https://rdunnington.github.io/blog/2020-6-17</link>
+			<guid>https://rdunnington.github.io/blog/2020-6-17</guid>
+			<pubDate>Wed, 17 Jun 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>Five Resources</description>
+			<link>https://rdunnington.github.io/blog/2020-5-25</link>
+			<guid>https://rdunnington.github.io/blog/2020-5-25</guid>
+			<pubDate>Mon, 25 May 2020 12:00:00 PDT</pubDate>
+		</item>
+		<item>
+			<description>Hello World</description>
+			<link>https://rdunnington.github.io/blog/2020-5-18</link>
+			<guid>https://rdunnington.github.io/blog/2020-5-18</guid>
+			<pubDate>Mon, 18 May 2020 12:00:00 PDT</pubDate>
+		</item>
+	</channel>
+</rss>

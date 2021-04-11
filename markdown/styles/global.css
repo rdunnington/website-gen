@@ -1,0 +1,102 @@
+a
+{
+	color:#00d060;
+}
+
+nav a
+{
+	margin:0px 5px;
+}
+
+body
+{
+	font-family: 'Consolas', 'Menlo', 'Bitstream Vera Sans Mono', 'sans-serif';
+	margin: auto;
+	padding:20px;
+	max-width: 600px;
+	text-align: left;
+	tab-size: 4;
+	color:#d0d0d0;
+	background-color:#202020;
+}
+
+img
+{
+	max-width: 600px;
+	border: 2px solid #eba613;
+}
+
+.spaced-list ul li
+{
+	padding: 4px;
+}
+
+.quote
+{
+	border: 2px;
+	border-radius: 5px;
+	padding: 10px;
+	background-color:#303030;
+}
+
+.inline-code
+{
+	border: 2px;
+	border-radius: 5px;
+	font-size:15px;
+	font-family:Courier, monospace;
+	color:#f92672;
+	background-color:#303030;
+}
+
+/* resume table */
+
+.resume-header
+{
+	display: table;
+	height: 100%;
+	width: 100%;
+	background: #004015;
+}
+
+.resume-h1-left
+{
+	display: table-cell;
+	width:50%;
+	text-align:left;
+	font-size: 18px;
+	padding:4px;
+}
+
+.resume-h1-right
+{
+	display: table-cell;
+	width:50%;
+	text-align:right;
+	font-size: 18px;
+	padding:4px;
+}
+
+.resume-h2-left
+{
+	display: table-cell;
+	width:50%;
+	text-align:left;
+	font-size: 16px;
+	padding:4px;
+}
+
+.resume-h2-right
+{
+	display: table-cell;
+	width:50%;
+	text-align:right;
+	font-size: 16px;
+	padding:4px;
+}
+
+.resume-entry
+{
+	display: table-cell;
+	width: 100%;
+}
