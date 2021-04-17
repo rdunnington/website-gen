@@ -518,7 +518,7 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 	return RJD_RESULT_OK();
 }
 
-struct rjd_result transform_markdown_file(const char* path_md, const char* path_html)
+struct rjd_result transform_markdown_file(const char* path_md, const char* path_html, const char* path_root)
 {
 	struct rjd_mem_allocator alloc = rjd_mem_allocator_init_default();
 
@@ -676,7 +676,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		}
 	}
 
-	const char* titleString = "";
+	const char* header_title = "";
 	if (stream.first_header_text) {
 		const struct token* t = stream.first_header_text;
 
@@ -685,7 +685,43 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		rjd_strbuf_appendl(&string, t->text, t->length);
 		rjd_strbuf_append(&string, " | Reuben Dunnington</title>");
 		struct rjd_strref* ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
-		titleString = rjd_strref_str(ref);
+		header_title = rjd_strref_str(ref);
+	}
+
+	const char* header_css = "";
+	const char* header_monokai = "";
+	const char* header_gtag = "";
+	const char* header_highlight = "";
+	{
+		struct rjd_strref* ref = NULL;
+
+		rjd_strbuf_clear(&string);
+		rjd_strbuf_append(&string, "\t<link rel=\"stylesheet\" type=\"text/css\" href=\"");
+		rjd_strbuf_append(&string, path_root);
+		rjd_strbuf_append(&string, "styles/global.css\">");
+		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+		header_css = rjd_strref_str(ref);
+
+		rjd_strbuf_clear(&string);
+		rjd_strbuf_append(&string, "\t<link rel=\"stylesheet\" type=\"text/css\" href=\">");
+		rjd_strbuf_append(&string, path_root);
+		rjd_strbuf_append(&string, "script/highlight/monokai.css\">");
+		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+		header_monokai = rjd_strref_str(ref);
+
+		rjd_strbuf_clear(&string);
+		rjd_strbuf_append(&string, "\t<script src=\"");
+		rjd_strbuf_append(&string, path_root);
+		rjd_strbuf_append(&string, "script/gtag.js\"></script>");
+		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+		header_gtag = rjd_strref_str(ref);
+
+		rjd_strbuf_clear(&string);
+		rjd_strbuf_append(&string, "\t<script src=\"");
+		rjd_strbuf_append(&string, path_root);
+		rjd_strbuf_append(&string, "script/script/highlight/highlight.pack.js\"></script>");
+		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+		header_highlight = rjd_strref_str(ref);
 	}
 
 	rjd_strbuf_free(&string);
@@ -695,17 +731,17 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		"<!DOCTYPE html>",
 		"<html>",
 		"<head>",
-		titleString,
+		header_title,
 		"\t<meta charset=\"UTF-8\">",
 		"\t<meta name=\"description\" content=\"Personal website with a blog and resume.\">",
 		"\t<meta name=\"keywords\" content=\"programming, blog\">",
 		"\t<meta name=\"author\" content=\"Reuben Dunnington\">",
 		"\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
-		"\t<link rel=\"stylesheet\" type=\"text/css\" href=\"../../styles/global.css\">",
-		"\t<link rel=\"stylesheet\" type=\"text/css\" href=\"../../script/highlight/monokai.css\">",
+		header_css,
+		header_monokai,
 		"\t<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-167453445-1\"></script>",
-		"\t<script src=\"../../script/gtag.js\"></script>",
-		"\t<script src=\"../../script/highlight/highlight.pack.js\"></script>",
+		header_gtag,
+		header_highlight,
 		"\t<script>hljs.initHighlightingOnLoad();</script>",
 		"</head>",
 		"<body>",
@@ -761,7 +797,7 @@ int main(int argc, const char** argv)
 	const char* path_md = argv[1];
 	const char* path_html = argv[2];
 
-	struct rjd_result r = transform_markdown_file(path_md, path_html);
+	struct rjd_result r = transform_markdown_file(path_md, path_html, "");
 	if (!rjd_result_isok(r)) {
 		printf("markdown error: %s", r.error);
 	}
