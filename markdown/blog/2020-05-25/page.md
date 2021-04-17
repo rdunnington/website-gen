@@ -1,5 +1,5 @@
 #Five Resources
-2020-5-25
+###2020-5-25
 
 My last post mentioned there have been a number of articles, talks, and people who have impacted my career. It would be amiss if I didn’t at least share what some of them were. Here are five of the most valuable in the rough chronological order I encountered them.
 
@@ -11,7 +11,7 @@ Somehow I stumbled across this blog post while I was in school. It helped me rea
 ###[On Inlined Code]([newtab] http://number-none.com/blow/john_carmack_on_inlined_code.html)
 ####John Carmack
 
-The subtle power of this idea is easy to overlook, like I did for years. Don’t try to hide complexity from the user and attempt to predict what you need to reuse and abstract ahead of time. Wait until you start seeing repeated patterns, then apply <a href="https://caseymuratori.com/blog_0015" target="_blank">semantic compression</a> to them. It saves time, leads to simpler code, and prevents harmful abstractions from taking root.
+The subtle power of this idea is easy to overlook, like I did for years. Don’t try to hide complexity from the user and attempt to predict what you need to reuse and abstract ahead of time. Wait until you start seeing repeated patterns, then apply [semantic compression]([newtab] https://caseymuratori.com/blog_0015) to them. It saves time, leads to simpler code, and prevents harmful abstractions from taking root.
 
 ###[Data Oriented Design]([newtab] https://www.youtube.com/watch?v=rX0ItVEVjHc)
 ####Mike Acton

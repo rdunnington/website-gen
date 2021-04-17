@@ -1,5 +1,5 @@
 #George Floyd
-##2020-6-17
+###2020-6-17
 
 With the recent murder of George Floyd at the hands of "law" enforcement and ensuing outburst of police brutality, it has finally been too much for Americans to ignore. With white supremacy rearing its ugly head yet again, it has felt tone deaf to write technical articles without taking some time to reflect on the challenges we face corporately as well as my lack of efforts to fight racism even as I live in a supposedly progressive city and state.
 
@@ -11,7 +11,12 @@ In light of the George Floyd protests, I have been grappling with this reality f
 
 It is a privilege for me to be able to learn about this history instead of experiencing it and its painful consequences. As I’ve been taking some time lately to learn and reflect on slavery and injustice in our country, a few days ago I remembered a scripture from Isaiah 58:6. The context is God speaking to the people of Israel about following the letter of the law of fasting, but not the heart of it.
 
-<p class="quote">Is not this the fast that I choose:<br>to loose the bonds of wickedness,<br>to undo the straps of the yoke,<br>to let the oppressed go free,<br>and to break every yoke?<br>- Isaiah 58:6</p>
+> Is not this the fast that I choose:
+> to loose the bonds of wickedness,
+> to undo the straps of the yoke,
+> to let the oppressed go free,
+> and to break every yoke?
+> - Isaiah 58:6
 
 The yoke of slavery continues even today to oppress the bodies, minds, and lives of so many of our Black brothers and sisters. I’ve realized I haven’t personally done much about it at all, even though my family was directly involved in the fastening of those same chains. I’m making a personal commitment to consistently giving my resources - time and money - to educating myself about the endemic American systems of racism and inequity as well as to organizations that have devoted themselves to breaking them.
 
