@@ -52,7 +52,7 @@ struct file_impl_t
 	// OS-specific data
 };;
 
-_Static_assert(sizeof(struct file_impl_t) &lt;= sizeof(struct file_t));
+_Static_assert(sizeof(struct file_impl_t) <= sizeof(struct file_t));
 ```
 
 No extra dynamic allocation or pointer hop needed. All this takes is an extra cast inside the functions. Both C++11 and C11 have static assert, so you can guarantee the casts are safe and catch potential cast size mismatches at build time.
@@ -67,19 +67,19 @@ bool file_open(struct file_t* file, const char* path)
 
 This also folds nicely into the principle of [zero-by-default]([newtab] https://ourmachinery.com/post/defaulting-to-zero/). If the API follows this convention, users can simply zero-initialize the struct and not have to worry about another function that initializes the private implementation. This approach works well with C-style codebases that don’t do a lot of RAII.
 
-he main drawback of this approach is the types become annoying to inspect in a debugger, since you have to cast them to the pimpl type. Most debuggers have custom visualizers that will make this a non-issue, like [Visual Studio]([newtab] https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) and [gdb]([newtab] http://plohrmann.blogspot.com/2013/10/writing-debug-visualizers-for-gdb.html).
+The main drawback of this approach is the types become annoying to inspect in a debugger, since you have to cast them to the pimpl type. Most debuggers have custom visualizers that will make this a non-issue, like [Visual Studio]([newtab] https://docs.microsoft.com/en-us/visualstudio/debugger/create-custom-views-of-native-objects) and [gdb]([newtab] http://plohrmann.blogspot.com/2013/10/writing-debug-visualizers-for-gdb.html).
 
 Here's an example for the above code in Visual Studio's visualizer:
 
 ```
-&lt?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;AutoVisualizer xmlns=&quot;http://schemas.microsoft.com/vstudio/debugger/natvis/2010&quot;&gt;
-    &lt;Type Name=&quot;file_t&quot;&gt;
-   	 &lt;Expand&gt;
-   		 &lt;Item Name=&quot;Impl&quot;&gt;(file_impl_t*)impl&lt;/Item&gt;
-   	 &lt;/Expand&gt;
-    &lt;/Type&gt;
-&lt;/AutoVisualizer&gt;
+<?xml version="1.0" encoding="utf-8">
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+    <Type Name="file_t">
+   	 <Expand>
+   		 <Item Name="Impl">(file_impl_t*)impl</Item>
+   	 </Expand>
+    </Type>
+</AutoVisualizer>
 ```
 
 I call this technique "flat pimpl" because it's essentially flattening the old pointer pimpl into the parent struct. That's pretty much it. It's a pretty simple idea, but easy to remember.
