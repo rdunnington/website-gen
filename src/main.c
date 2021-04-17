@@ -10,6 +10,7 @@
 enum token_type
 {
 	TOKEN_TYPE_TEXT,
+	TOKEN_TYPE_NEWLINE,
 	TOKEN_TYPE_HASH,
 	TOKEN_TYPE_ASTERISK,
 	TOKEN_TYPE_SQUARE_BRACKET_OPEN,
@@ -25,6 +26,7 @@ enum token_type
 const char TOKEN_SYMBOLS[] =
 {
 	0,
+	'\n',
 	'#',
 	'*',
 	'[',
@@ -49,7 +51,7 @@ struct token_stream
 	const struct token* tokens;
 	const struct token* first_header_text;
 	uint32_t cursor;
-	uint32_t indent;
+	int32_t indent;
 };
 
 
@@ -66,7 +68,10 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 
 void add_indent(struct rjd_strbuf* out, const struct token_stream* stream)
 {
-	for (size_t i = 0; i < stream->indent; ++i)
+	if (stream->indent < 0) {
+		printf("stream indent went negative! value: %d", stream->indent);
+	}
+	for (int i = 0; i < stream->indent; ++i)
 	{
 		rjd_strbuf_append(out, "\t");
 	}
@@ -93,7 +98,11 @@ struct rjd_result advance_token(struct token_stream* stream)
 	}
 
 	const struct token* t = stream->tokens + stream->cursor;
-	printf("advance_token: %.*s\n", t->length, t->text);
+	if (t->type == TOKEN_TYPE_NEWLINE) {
+		printf("advance_token: {newline}\n");
+	} else {
+		printf("advance_token: %.*s\n", t->length, t->text);
+	}
 	return RJD_RESULT_OK();
 }
 
@@ -115,16 +124,25 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 		switch (t->type)
 		{
 			case TOKEN_TYPE_TEXT:
+				printf("text_parse: text: %.*s\n", t->length, t->text);
 				rjd_strbuf_appendl(out, t->text, t->length);
-				consuming = false;
+				//consuming = false;
+				break;
+			case TOKEN_TYPE_SLASH_FORWARD:
+			case TOKEN_TYPE_PAREN_OPEN:
+			case TOKEN_TYPE_PAREN_CLOSE:
+				rjd_strbuf_appendl(out, t->text, t->length);
 				break;
 			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
 				printf("parse_text: begin parsing link\n");
 				RJD_RESULT_PROMOTE(parse_link(out, stream));
-				consuming = false;
+				//consuming = false;
 				break;
 			default:
-				return RJD_RESULT("unexpected token in text stream");
+				printf("parse_text: got non-text token (%u) '%c'\n", t->type, *t->text);
+				consuming = false;
+				break;
+				//return RJD_RESULT("unexpected token in text stream");
 		}
 		advance_token(stream);
 	}
@@ -134,6 +152,8 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 
 struct rjd_result parse_paragraph(struct rjd_strbuf* out, struct token_stream* stream)
 {
+	const struct token* t = stream->tokens + stream->cursor;
+	printf("parse paragraph beginning with: '%*.s'\n", t->length, t->text);
 	add_indent(out, stream);
 
 	bool is_plain_text = stream->tokens[stream->cursor].type == TOKEN_TYPE_TEXT;
@@ -260,6 +280,18 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 	return RJD_RESULT_OK();
 }
 
+uint32_t find_html_tag_length(const struct token* t)
+{
+	RJD_ASSERT(t->type == TOKEN_TYPE_TEXT);
+
+	for (uint32_t i = 0; i < t->length; ++i) {
+		if (!isspace(t->text[i])) {
+			return i;
+		}
+	}
+	return t->length;
+}
+
 struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream)
 {
 	const struct token* t = stream->tokens + stream->cursor;
@@ -270,25 +302,28 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 
 	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
 	t = stream->tokens + stream->cursor;
-	//const struct token* html_tag = t;
+	const struct token* html_tag = t;
+	const uint32_t html_tag_length = find_html_tag_length(t);
 
 	rjd_strbuf_appendl(out, t->text, t->length);
+	++stream->indent;
 
-	int32_t angle_bracket_count = 1;
-	while (true)
+	int32_t tag_count = 1;
+	while (tag_count > 0)
 	{
+		//if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
+		//	rjd_strbuf_append(out, "\n");
+		//	add_indent(out, stream);
+		//}
+
 		RJD_RESULT_PROMOTE(advance_token(stream));
 		t = stream->tokens + stream->cursor;
 
-		rjd_strbuf_appendl(out, t->text, t->length);
-
-		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN) {
-			++angle_bracket_count;
-		}
-
-		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
-			--angle_bracket_count;
-		}
+		//if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN) {
+		//	++stream->indent;
+		//} else if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
+		//	--stream->indent;
+		//}
 
 		const struct token* next = NULL;
 		const struct token* next2 = NULL;
@@ -297,14 +332,57 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 			next2 = stream->tokens + stream->cursor + 2;
 		}
 
-		if (angle_bracket_count == 1 &&
-			t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN &&
+		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN &&
+			next && next->type == TOKEN_TYPE_TEXT)
+		{
+			uint32_t next_length = find_html_tag_length(next);
+			uint32_t length = rjd_math_minu32(html_tag_length, next_length);
+
+			//printf("comparing open:\n\t%.*s\n\t%.*s\n\tmin length: %u\n",
+			//		html_tag_length, html_tag->text,
+			//		next_length, next->text,
+			//		length);
+			if (!strncmp(html_tag->text, next->text, length)) {
+				//printf("tag_count: %u\n", tag_count);
+				++tag_count;
+				++stream->indent;
+			}
+		}
+
+		if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN &&
 			next && next->type == TOKEN_TYPE_SLASH_FORWARD &&
 			next2 && next2->type == TOKEN_TYPE_TEXT)
 		{
-			//strncmp(html_tag->text, next2->text, rjd_math_minu32(html_tag->length, next2->length)))
-			// found the matching end tag
-			break;
+			uint32_t next2_length = find_html_tag_length(next2);
+			uint32_t length = rjd_math_minu32(html_tag->length, next2_length);
+
+			//printf("comparing close:\n\t%.*s\n\t%.*s\n\tmin length: %u\n",
+			//		html_tag_length, html_tag->text,
+			//		next2_length, next2->text,
+			//		length);
+
+			if (!strncmp(html_tag->text, next2->text, length)) {
+				--tag_count;
+				--stream->indent;
+
+				//printf("tag_count: %u\n", tag_count);
+				if (tag_count == 0) {
+					// a bit of a hack, but we didn't know this would be 
+					// the end tag when we were adding the previous indent
+					if (rjd_strbuf_str(out)[out->length - 1] == '\t') {
+						out->length -= 1;
+					}
+					//printf("found end tag: %.*s\n", next2->length, next2->text);
+				}
+			}
+		}
+		//printf("parse_html loop\n");
+
+		rjd_strbuf_appendl(out, t->text, t->length);
+
+		if (t->type == TOKEN_TYPE_NEWLINE) {
+			printf("indent: %d", stream->indent);
+			add_indent(out, stream);
 		}
 	}
 
@@ -319,6 +397,8 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_ANGLE_BRACKET_CLOSE));
 	t = stream->tokens + stream->cursor;
 	rjd_strbuf_appendl(out, t->text, t->length);
+
+	rjd_strbuf_append(out, "\n");
 
 	advance_token(stream);
 
@@ -342,7 +422,7 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 	const char* end = file_contents + file_size;
 	for (const char* next = file_contents; next < end; )
 	{
-		while (isspace(*next) && next < end) {
+		while (isspace(*next) && *next != '\n' && next < end) {
 			++next;
 		}
 
@@ -358,6 +438,10 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 
 		switch (*next)
 		{
+		case '\n':
+			t.type = TOKEN_TYPE_NEWLINE;
+			++next;
+			break;
 		case '#':
 			t.type = TOKEN_TYPE_HASH;
 			++next;
@@ -395,7 +479,7 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 			++next;
 			break;
 		default:
-			while (*next != '\n' && next < end) {
+			while (next < end) {
 				bool end_token = false;
 				for (size_t i = 0; i < rjd_countof(TOKEN_SYMBOLS); ++i) {
 					if (*next == TOKEN_SYMBOLS[i]) {
@@ -429,13 +513,16 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 	while (stream.cursor < rjd_array_count(stream.tokens))
 	{
 		const struct token* t = stream.tokens + stream.cursor;
-		printf("top-level token: %.*s\n", t->length, t->text);
+		printf("top-level token (type %d): %.*s\n", t->type, t->length, t->text);
 
 		struct rjd_result result = {0};
 
 		string.length = 0;
 		switch (stream.tokens[stream.cursor].type)
 		{
+			case TOKEN_TYPE_NEWLINE:
+				result = advance_token(&stream);
+				break;
 			case TOKEN_TYPE_TEXT:
 			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
 				result = parse_paragraph(&string, &stream);
@@ -445,6 +532,9 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 				break;
 			case TOKEN_TYPE_ASTERISK:
 				result = parse_list(&string, &stream);
+				break;
+			case TOKEN_TYPE_ANGLE_BRACKET_OPEN:
+				result = parse_html(&string, &stream);
 				break;
 			default:
 				printf("bad token %c\n", *stream.tokens[stream.cursor].text);
@@ -457,8 +547,10 @@ struct rjd_result transform_markdown_file(const char* mdFilepath, const char* ht
 			break;
 		}
 
-		struct rjd_strref* ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
-		rjd_array_push(md_lines, rjd_strref_str(ref));
+		if (string.length > 0) {
+			struct rjd_strref* ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
+			rjd_array_push(md_lines, rjd_strref_str(ref));
+		}
 	}
 
 	const char* titleString = "";

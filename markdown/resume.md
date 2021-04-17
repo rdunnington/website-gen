@@ -96,7 +96,7 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 * Implemented features, fixed bugs, and improved stability for a critical E3 demo a month after joining the team.
 * Closely collaborated with artists to realize their UI vision throughout the game on multiple platforms.
 
-<div class="resume-header"<>
+<div class="resume-header">
 	<div class="resume-h1-left">Canceled Mobile Title</div>
 	<div class="resume-h1-right">5TH Cell Media</div>
 </div>
@@ -105,7 +105,7 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 	<div class="resume-h2-right">March 2011 to Mar 2012</div>
 </div>
 
-* Implemented gameplay features and designer-oriented editing tools that tightly integrated with Unity.</li>
+* Implemented gameplay features and designer-oriented editing tools that tightly integrated with Unity.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Drawn to Life: Collection</div>
