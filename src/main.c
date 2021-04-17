@@ -158,6 +158,9 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 				//printf("parse_text: begin parsing link\n");
 				RJD_RESULT_PROMOTE(parse_link(out, stream));
 				break;
+			case TOKEN_TYPE_BACKTICK:
+				RJD_RESULT_PROMOTE(parse_code(out, stream));
+				break;
 			default:
 				printf("parse_text: got non-text token (%u) '%c'\n", t->type, *t->text);
 				consuming = false;
@@ -511,8 +514,6 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 	} else {
 		rjd_strbuf_append(out, "</span>");
 	}
-
-	advance_token(stream);
 
 	return RJD_RESULT_OK();
 }
