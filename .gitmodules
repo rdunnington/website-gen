@@ -1,3 +1,9 @@
 [submodule "rdunnington.github.io"]
 	path = rdunnington.github.io
 	url = https://github.com/rdunnington/rdunnington.github.io
+[submodule "src/rjd"]
+	path = src/rjd
+	url = https://github.com/rdunnington/rjd.git
+[submodule "rjd"]
+	path = rjd
+	url = ./src/rjd

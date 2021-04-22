@@ -35,6 +35,8 @@ clean:
 	rm *.stackdump
 	rm main
 	rm -r main.dSYM
+	rm -r test
 
 test:
-	./$(OUTPUT_FILE) ../markdown/projects.md ../projects.html
+	mkdir test
+	./$(OUTPUT_FILE) ../markdown test

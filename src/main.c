@@ -5,7 +5,7 @@
 #define RJD_ENABLE_LOGGING 1
 #define RJD_ENABLE_ASSERT 1
 #define RJD_GFX_BACKEND_NONE 1
-#include "rjd.h"
+#include "rjd/rjd_all.h"
 
 enum token_type
 {
@@ -518,17 +518,15 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 	return RJD_RESULT_OK();
 }
 
-struct rjd_result transform_markdown_file(const char* path_md, const char* path_html, const char* path_root)
+struct rjd_result transform_markdown_file(const char* path_md, const char* path_html, const char* path_root, struct rjd_mem_allocator* alloc)
 {
-	struct rjd_mem_allocator alloc = rjd_mem_allocator_init_default();
-
 	size_t file_size = 0;
 	RJD_RESULT_PROMOTE(rjd_fio_size(path_md, &file_size));
 
 	char* file_contents = NULL;
-	RJD_RESULT_PROMOTE(rjd_fio_read(path_md, &file_contents, &alloc));
+	RJD_RESULT_PROMOTE(rjd_fio_read(path_md, &file_contents, alloc));
 
-	struct token* tokens = rjd_array_alloc(struct token, 4096, &alloc);
+	struct token* tokens = rjd_array_alloc(struct token, 4096, alloc);
 
 	const char* end = file_contents + file_size;
 	for (const char* next = file_contents; next < end; )
@@ -615,9 +613,9 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		rjd_array_push(tokens, t);
 	}
 
-	struct rjd_strpool strings = rjd_strpool_init(&alloc, 4096);
-	const char** md_lines = rjd_array_alloc(const char*, rjd_array_count(tokens), &alloc);
-	struct rjd_strbuf string = rjd_strbuf_init(&alloc);
+	struct rjd_strpool strings = rjd_strpool_init(alloc, 4096);
+	const char** md_lines = rjd_array_alloc(const char*, rjd_array_count(tokens), alloc);
+	struct rjd_strbuf string = rjd_strbuf_init(alloc);
 
 	struct token_stream stream =
 	{
@@ -790,17 +788,63 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 int main(int argc, const char** argv)
 {
 	if (argc < 3) {
-		printf("Usage: %s <markdown file> <output file>\n", argv[0]);
+		printf("Usage: %s <input folder> <output folder>\n", argv[0]);
 		return 0;
 	}
 
-	const char* path_md = argv[1];
-	const char* path_html = argv[2];
+	struct rjd_mem_allocator alloc = rjd_mem_allocator_init_default();
 
-	struct rjd_result r = transform_markdown_file(path_md, path_html, "");
-	if (!rjd_result_isok(r)) {
-		printf("markdown error: %s", r.error);
+	const char* path_source = argv[1];
+	const char* path_destination = argv[2];
+
+	struct rjd_strbuf system_command = rjd_strbuf_init(&alloc);
+
+	struct rjd_path_enumerator_state path_walker = rjd_path_enumerate_create(path_source, &alloc, RJD_PATH_ENUMERATE_MODE_RECURSIVE);
+	for(const char* path_input = rjd_path_enumerate_next(&path_walker);
+		path_input != NULL;
+		path_input = rjd_path_enumerate_next(&path_walker)) 
+	{
+
+		struct rjd_path path_output = rjd_path_init_with(path_input);
+		rjd_path_pop_front_path_str(&path_output, path_source);
+		rjd_path_join_front(&path_output, path_destination);
+
+		const bool is_markdown = rjd_path_str_endswith(path_input, ".md");
+		if (is_markdown) {
+			rjd_path_pop_extension(&path_output);
+			rjd_path_append(&path_output, ".html");
+
+			struct rjd_path to_root = rjd_path_init();
+			struct rjd_path output_copy = path_output;
+			rjd_path_pop(&output_copy);
+			printf("\n");
+			while (output_copy.length != 0) {
+				printf("output_copy: %s\n", output_copy.str);
+				rjd_path_pop(&output_copy);
+				rjd_path_join_str(&to_root, "..");
+			}
+
+			const char* path_output_str = rjd_path_get(&path_output);
+			struct rjd_result r = transform_markdown_file(path_input, path_output_str, rjd_path_get(&to_root), &alloc);
+			if (rjd_result_isok(r)) {
+				printf("transform %s -> %s\n", path_input, path_output_str);
+			} else {
+				printf("Markdown error in file '%s': %s", path_input, r.error);
+			}
+		} else {
+			if (RJD_PLATFORM_WINDOWS) {
+				rjd_strbuf_append(&system_command, "copy /y %s %s", path_input, rjd_path_get(&path_output));
+			} else {
+				rjd_strbuf_append(&system_command, "cp %s %s", path_input, rjd_path_get(&path_output));
+			}
+
+			printf("%s\n", rjd_strbuf_str(&system_command));
+			system(rjd_strbuf_str(&system_command));
+			rjd_strbuf_clear(&system_command);
+		}
 	}
+
+	rjd_path_enumerate_destroy(&path_walker);
 
 	return 0;
 }
