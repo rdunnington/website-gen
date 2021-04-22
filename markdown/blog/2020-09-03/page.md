@@ -39,7 +39,6 @@ In case you haven’t listened to it yet, go check out the Our Machinery podcast
 The tip is to lean on the unused variable warning. If the init/cleanup calls are wrapped in macros, that detail is hidden from the user and you get the automatic benefit of a warning if a matching cleanup macro is not used.
 
 ```
-
 #define SCOPED_RESOURCE_BEGIN(name)		\
 	struct Resource name;			\
 	ResourceInitialize(&amp;name);		\
