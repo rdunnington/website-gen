@@ -119,12 +119,12 @@ struct rjd_result advance_token(struct token_stream* stream)
 		return RJD_RESULT("end of token stream");
 	}
 
-	const struct token* t = stream->tokens + stream->cursor;
-	if (t->type == TOKEN_TYPE_NEWLINE) {
-		printf("advance_token: {newline}\n");
-	} else {
-		printf("advance_token: %.*s\n", t->length, t->text);
-	}
+	//const struct token* t = stream->tokens + stream->cursor;
+	//if (t->type == TOKEN_TYPE_NEWLINE) {
+	//	printf("advance_token: {newline}\n");
+	//} else {
+	//	printf("advance_token: %.*s\n", t->length, t->text);
+	//}
 	return RJD_RESULT_OK();
 }
 
@@ -146,7 +146,7 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 		switch (t->type)
 		{
 			case TOKEN_TYPE_TEXT:
-				printf("text_parse: text: %.*s\n", t->length, t->text);
+				//printf("text_parse: text: %.*s\n", t->length, t->text);
 				rjd_strbuf_appendl(out, t->text, t->length);
 				break;
 			case TOKEN_TYPE_SLASH_FORWARD:
@@ -162,7 +162,7 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 				RJD_RESULT_PROMOTE(parse_code(out, stream));
 				break;
 			default:
-				printf("parse_text: got non-text token (%u) '%c'\n", t->type, *t->text);
+				//printf("parse_text: got non-text token (%u) '%c'\n", t->type, *t->text);
 				consuming = false;
 				break;
 		}
@@ -174,8 +174,6 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 
 struct rjd_result parse_paragraph(struct rjd_strbuf* out, struct token_stream* stream)
 {
-	const struct token* t = stream->tokens + stream->cursor;
-	printf("parse paragraph beginning with: '%*.s'\n", t->length, t->text);
 	append_indent(out, stream);
 
 	bool is_plain_text = stream->tokens[stream->cursor].type == TOKEN_TYPE_TEXT;
@@ -360,12 +358,7 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 			uint32_t next_length = find_html_tag_length(next);
 			uint32_t length = rjd_math_minu32(html_tag_length, next_length);
 
-			//printf("comparing open:\n\t%.*s\n\t%.*s\n\tmin length: %u\n",
-			//		html_tag_length, html_tag->text,
-			//		next_length, next->text,
-			//		length);
 			if (!strncmp(html_tag->text, next->text, length)) {
-				//printf("tag_count: %u\n", tag_count);
 				++tag_count;
 				++stream->indent;
 			}
@@ -378,32 +371,23 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 			uint32_t next2_length = find_html_tag_length(next2);
 			uint32_t length = rjd_math_minu32(html_tag->length, next2_length);
 
-			//printf("comparing close:\n\t%.*s\n\t%.*s\n\tmin length: %u\n",
-			//		html_tag_length, html_tag->text,
-			//		next2_length, next2->text,
-			//		length);
-
 			if (!strncmp(html_tag->text, next2->text, length)) {
 				--tag_count;
 				--stream->indent;
 
-				//printf("tag_count: %u\n", tag_count);
 				if (tag_count == 0) {
 					// a bit of a hack, but we didn't know this would be 
 					// the end tag when we were adding the previous indent
 					if (rjd_strbuf_str(out)[out->length - 1] == '\t') {
 						out->length -= 1;
 					}
-					//printf("found end tag: %.*s\n", next2->length, next2->text);
 				}
 			}
 		}
-		//printf("parse_html loop\n");
 
 		rjd_strbuf_appendl(out, t->text, t->length);
 
 		if (t->type == TOKEN_TYPE_NEWLINE) {
-			printf("indent: %d", stream->indent);
 			append_indent(out, stream);
 		}
 	}
@@ -520,26 +504,17 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 
 struct rjd_result transform_markdown_file(const char* path_md, const char* path_html, const char* path_root, struct rjd_mem_allocator* alloc)
 {
-	size_t file_size = 0;
-	RJD_RESULT_PROMOTE(rjd_fio_size(path_md, &file_size));
+	size_t md_file_size = 0;
+	RJD_RESULT_PROMOTE(rjd_fio_size(path_md, &md_file_size));
 
-	char* file_contents = NULL;
-	RJD_RESULT_PROMOTE(rjd_fio_read(path_md, &file_contents, alloc));
+	char* md_file_contents = NULL;
+	RJD_RESULT_PROMOTE(rjd_fio_read(path_md, &md_file_contents, alloc));
 
 	struct token* tokens = rjd_array_alloc(struct token, 4096, alloc);
 
-	const char* end = file_contents + file_size;
-	for (const char* next = file_contents; next < end; )
+	const char* end = md_file_contents + md_file_size;
+	for (const char* next = md_file_contents; next < end; )
 	{
-		//while (isspace(*next) && *next != '\n' && next < end) {
-		//while (*next != '\n' && next < end) {
-		//	++next;
-		//}
-
-		//if (next >= end) {
-		//	break;
-		//}
-
 		struct token t = {
 			.type = TOKEN_TYPE_TEXT, 
 			.text = next, 
@@ -627,8 +602,8 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 
 	while (stream.cursor < rjd_array_count(stream.tokens))
 	{
-		const struct token* t = stream.tokens + stream.cursor;
-		printf("top-level token (type %d): %.*s\n", t->type, t->length, t->text);
+		//const struct token* t = stream.tokens + stream.cursor;
+		//printf("top-level token (type %d): %.*s\n", t->type, t->length, t->text);
 
 		struct rjd_result result = {0};
 
@@ -658,7 +633,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 				result = parse_code(&string, &stream);
 				break;
 			default:
-				printf("bad token %c\n", *stream.tokens[stream.cursor].text);
+				//printf("bad token %c\n", *stream.tokens[stream.cursor].text);
 				result = RJD_RESULT("unexpected token at top level");
 				break;
 		}
@@ -757,27 +732,30 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		"</html>",
 	};
 
-	FILE* htmlFile = fopen(path_html, "wt");
+	FILE* file_html = fopen(path_html, "wt");
+	if (!file_html) {
+		return RJD_RESULT("Failed to open output file path for write");
+	}
 
 	for (size_t i = 0; i < rjd_countof(header_lines); ++i)
 	{
 		printf("%s\n", header_lines[i]);
-		fprintf(htmlFile, "%s\n", header_lines[i]);
+		fprintf(file_html, "%s\n", header_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_array_count(md_lines); ++i)
 	{
 		printf("%s", md_lines[i]);
-		fprintf(htmlFile, "%s", md_lines[i]);
+		fprintf(file_html, "%s", md_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_countof(footer_lines); ++i)
 	{
 		printf("%s\n", footer_lines[i]);
-		fprintf(htmlFile, "%s\n", footer_lines[i]);
+		fprintf(file_html, "%s\n", footer_lines[i]);
 	}
 
-	fclose(htmlFile);
+	fclose(file_html);
 	rjd_array_free(tokens);
 	rjd_array_free(md_lines);
 	rjd_strpool_free(&strings);
