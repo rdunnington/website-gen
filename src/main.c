@@ -119,12 +119,6 @@ struct rjd_result advance_token(struct token_stream* stream)
 		return RJD_RESULT("end of token stream");
 	}
 
-	//const struct token* t = stream->tokens + stream->cursor;
-	//if (t->type == TOKEN_TYPE_NEWLINE) {
-	//	printf("advance_token: {newline}\n");
-	//} else {
-	//	printf("advance_token: %.*s\n", t->length, t->text);
-	//}
 	return RJD_RESULT_OK();
 }
 
@@ -146,7 +140,6 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 		switch (t->type)
 		{
 			case TOKEN_TYPE_TEXT:
-				//printf("text_parse: text: %.*s\n", t->length, t->text);
 				rjd_strbuf_appendl(out, t->text, t->length);
 				break;
 			case TOKEN_TYPE_SLASH_FORWARD:
@@ -155,14 +148,12 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 				rjd_strbuf_appendl(out, t->text, t->length);
 				break;
 			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
-				//printf("parse_text: begin parsing link\n");
 				RJD_RESULT_PROMOTE(parse_link(out, stream));
 				break;
 			case TOKEN_TYPE_BACKTICK:
 				RJD_RESULT_PROMOTE(parse_code(out, stream));
 				break;
 			default:
-				//printf("parse_text: got non-text token (%u) '%c'\n", t->type, *t->text);
 				consuming = false;
 				break;
 		}
@@ -602,9 +593,6 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 
 	while (stream.cursor < rjd_array_count(stream.tokens))
 	{
-		//const struct token* t = stream.tokens + stream.cursor;
-		//printf("top-level token (type %d): %.*s\n", t->type, t->length, t->text);
-
 		struct rjd_result result = {0};
 
 		string.length = 0;
@@ -745,19 +733,16 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 
 	for (size_t i = 0; i < rjd_countof(header_lines); ++i)
 	{
-		//printf("%s\n", header_lines[i]);
 		fprintf(file_html, "%s\n", header_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_array_count(md_lines); ++i)
 	{
-		//printf("%s", md_lines[i]);
 		fprintf(file_html, "%s", md_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_countof(footer_lines); ++i)
 	{
-		//printf("%s\n", footer_lines[i]);
 		fprintf(file_html, "%s\n", footer_lines[i]);
 	}
 
