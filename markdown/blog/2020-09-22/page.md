@@ -31,7 +31,8 @@ test:
 
 Now we can define the job and break it up into checkout, build, and test steps.
 
-```jobs:
+```
+jobs:
   build_osx:
     name: OSX Build & Test
     runs-on: macos-latest

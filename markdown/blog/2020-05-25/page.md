@@ -18,7 +18,7 @@ The subtle power of this idea is easy to overlook, like I did for years. Don’t
 
 Data oriented design was a vague concept in my mind until Mike Acton’s talk. A key takeaway is gathering the input and output data requirements of the system. Once established, the system often becomes a linear data transformation, where each part of the pipeline can be broken apart into atomic pieces that are much easier to reason about.
 
-###[Designing and Evaluating Reusable Component]([newtab] https://caseymuratori.com/blog_0024)
+###[Designing and Evaluating Reusable Components]([newtab] https://caseymuratori.com/blog_0024)
 ####Casey Muratori
 
 Casey’s talk was the first I’d ever heard that broke API design down into individual pieces and had examples of them reflecting things I’d actually seen in the real world. The five characteristics Casey enumerates are invaluable metrics to evaluate both existing APIs and new ones you need to write for others.
