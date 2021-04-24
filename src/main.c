@@ -322,19 +322,8 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 	int32_t tag_count = 1;
 	while (tag_count > 0)
 	{
-		//if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
-		//	rjd_strbuf_append(out, "\n");
-		//	append_indent(out, stream);
-		//}
-
 		RJD_RESULT_PROMOTE(advance_token(stream));
 		t = stream->tokens + stream->cursor;
-
-		//if (t->type == TOKEN_TYPE_ANGLE_BRACKET_OPEN) {
-		//	++stream->indent;
-		//} else if (t->type == TOKEN_TYPE_ANGLE_BRACKET_CLOSE) {
-		//	--stream->indent;
-		//}
 
 		const struct token* next = NULL;
 		const struct token* next2 = NULL;
@@ -599,7 +588,9 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		switch (stream.tokens[stream.cursor].type)
 		{
 			case TOKEN_TYPE_NEWLINE:
-				result = advance_token(&stream);
+				// Markdown files with a newline at the end won't be able to advance the stream, reporting
+				// an error. Instead of propagating that error, just let the loop exit normally
+				advance_token(&stream);
 				break;
 			case TOKEN_TYPE_TEXT:
 			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
