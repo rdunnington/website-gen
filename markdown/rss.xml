@@ -7,45 +7,51 @@
 		<description>Reuben Dunnington's personal website and technical/opinion blog.</description>
 		<language>en-us</language>
 		<item>
+			<description>Comparing Aggregate Data</description>
+			<link>https://rdunnington.github.io/blog/2021-04-24/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2021-04-24/page.html</guid>
+			<pubDate>Sat, 24 Apr 2021 12:00:00 PDT</pubDate>
+		</item>
+		<item>
 			<description>Enforcing static strings in structs</description>
-			<link>https://rdunnington.github.io/blog/2020-10-14</link>
-			<guid>https://rdunnington.github.io/blog/2020-10-14</guid>
+			<link>https://rdunnington.github.io/blog/2020-10-14/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-10-14/page.html</guid>
 			<pubDate>Wed, 14 Oct 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>Simple CI in Github</description>
-			<link>https://rdunnington.github.io/blog/2020-9-22</link>
-			<guid>https://rdunnington.github.io/blog/2020-9-22</guid>
+			<link>https://rdunnington.github.io/blog/2020-9-22/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-9-22/page.html</guid>
 			<pubDate>Tue, 22 Sep 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>Scoped Resources in C</description>
-			<link>https://rdunnington.github.io/blog/2020-9-3</link>
-			<guid>https://rdunnington.github.io/blog/2020-9-3</guid>
+			<link>https://rdunnington.github.io/blog/2020-9-3/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-9-3/page.html</guid>
 			<pubDate>Thu, 3 Sep 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>Flat Pimpl</description>
-			<link>https://rdunnington.github.io/blog/2020-7-19</link>
-			<guid>https://rdunnington.github.io/blog/2020-7-19</guid>
+			<link>https://rdunnington.github.io/blog/2020-7-19/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-7-19/page.html</guid>
 			<pubDate>Sun, 19 Jul 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>George Floyd</description>
-			<link>https://rdunnington.github.io/blog/2020-6-17</link>
-			<guid>https://rdunnington.github.io/blog/2020-6-17</guid>
+			<link>https://rdunnington.github.io/blog/2020-6-17/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-6-17/page.html</guid>
 			<pubDate>Wed, 17 Jun 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>Five Resources</description>
-			<link>https://rdunnington.github.io/blog/2020-5-25</link>
-			<guid>https://rdunnington.github.io/blog/2020-5-25</guid>
+			<link>https://rdunnington.github.io/blog/2020-5-25/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-5-25/page.html</guid>
 			<pubDate>Mon, 25 May 2020 12:00:00 PDT</pubDate>
 		</item>
 		<item>
 			<description>Hello World</description>
-			<link>https://rdunnington.github.io/blog/2020-5-18</link>
-			<guid>https://rdunnington.github.io/blog/2020-5-18</guid>
+			<link>https://rdunnington.github.io/blog/2020-5-18/page.html</link>
+			<guid>https://rdunnington.github.io/blog/2020-5-18/page.html</guid>
 			<pubDate>Mon, 18 May 2020 12:00:00 PDT</pubDate>
 		</item>
 	</channel>
