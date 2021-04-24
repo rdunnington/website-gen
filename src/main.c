@@ -633,7 +633,6 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 				result = parse_code(&string, &stream);
 				break;
 			default:
-				//printf("bad token %c\n", *stream.tokens[stream.cursor].text);
 				result = RJD_RESULT("unexpected token at top level");
 				break;
 		}
@@ -676,7 +675,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		header_css = rjd_strref_str(ref);
 
 		rjd_strbuf_clear(&string);
-		rjd_strbuf_append(&string, "\t<link rel=\"stylesheet\" type=\"text/css\" href=\">");
+		rjd_strbuf_append(&string, "\t<link rel=\"stylesheet\" type=\"text/css\" href=\"");
 		rjd_strbuf_append(&string, path_root);
 		rjd_strbuf_append(&string, "script/highlight/monokai.css\">");
 		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
@@ -692,7 +691,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		rjd_strbuf_clear(&string);
 		rjd_strbuf_append(&string, "\t<script src=\"");
 		rjd_strbuf_append(&string, path_root);
-		rjd_strbuf_append(&string, "script/script/highlight/highlight.pack.js\"></script>");
+		rjd_strbuf_append(&string, "script/highlight/highlight.pack.js\"></script>");
 		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
 		header_highlight = rjd_strref_str(ref);
 	}
@@ -732,6 +731,13 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		"</html>",
 	};
 
+	// ensure the path exists
+	{
+		struct rjd_path output_folder = rjd_path_init_with(path_html);
+		rjd_path_pop(&output_folder);
+		rjd_fio_mkdir(rjd_path_get(&output_folder));
+	}
+
 	FILE* file_html = fopen(path_html, "wt");
 	if (!file_html) {
 		return RJD_RESULT("Failed to open output file path for write");
@@ -739,19 +745,19 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 
 	for (size_t i = 0; i < rjd_countof(header_lines); ++i)
 	{
-		printf("%s\n", header_lines[i]);
+		//printf("%s\n", header_lines[i]);
 		fprintf(file_html, "%s\n", header_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_array_count(md_lines); ++i)
 	{
-		printf("%s", md_lines[i]);
+		//printf("%s", md_lines[i]);
 		fprintf(file_html, "%s", md_lines[i]);
 	}
 
 	for (size_t i = 0; i < rjd_countof(footer_lines); ++i)
 	{
-		printf("%s\n", footer_lines[i]);
+		//printf("%s\n", footer_lines[i]);
 		fprintf(file_html, "%s\n", footer_lines[i]);
 	}
 
@@ -782,6 +788,14 @@ int main(int argc, const char** argv)
 		path_input != NULL;
 		path_input = rjd_path_enumerate_next(&path_walker)) 
 	{
+		enum rjd_fio_attributes attribs = 0;
+		if (!rjd_result_isok(rjd_fio_attributes_get(path_input, &attribs)) || (attribs & RJD_FIO_ATTRIBUTES_DIRECTORY)) {
+			continue;
+		}
+
+		if (RJD_PLATFORM_OSX && strstr(path_input, "DS_Store")) {
+			continue;
+		}
 
 		struct rjd_path path_output = rjd_path_init_with(path_input);
 		rjd_path_pop_front_path_str(&path_output, path_source);
@@ -795,11 +809,14 @@ int main(int argc, const char** argv)
 			struct rjd_path to_root = rjd_path_init();
 			struct rjd_path output_copy = path_output;
 			rjd_path_pop(&output_copy);
-			printf("\n");
+			rjd_path_pop(&output_copy);
 			while (output_copy.length != 0) {
-				printf("output_copy: %s\n", output_copy.str);
 				rjd_path_pop(&output_copy);
 				rjd_path_join_str(&to_root, "..");
+			}
+
+			if (to_root.length > 0) {
+				rjd_path_append(&to_root, "/");
 			}
 
 			const char* path_output_str = rjd_path_get(&path_output);
@@ -807,13 +824,16 @@ int main(int argc, const char** argv)
 			if (rjd_result_isok(r)) {
 				printf("transform %s -> %s\n", path_input, path_output_str);
 			} else {
-				printf("Markdown error in file '%s': %s", path_input, r.error);
+				printf("Markdown error in file '%s': %s\n", path_input, r.error);
 			}
 		} else {
 			if (RJD_PLATFORM_WINDOWS) {
 				rjd_strbuf_append(&system_command, "copy /y %s %s", path_input, rjd_path_get(&path_output));
 			} else {
-				rjd_strbuf_append(&system_command, "cp %s %s", path_input, rjd_path_get(&path_output));
+				struct rjd_path folder = rjd_path_init_with(rjd_path_get(&path_output));
+				rjd_path_pop(&folder);
+				rjd_fio_mkdir(rjd_path_get(&folder));
+				rjd_strbuf_append(&system_command, "cp -R %s %s", path_input, rjd_path_get(&path_output));
 			}
 
 			printf("%s\n", rjd_strbuf_str(&system_command));
