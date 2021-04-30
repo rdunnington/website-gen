@@ -12,7 +12,7 @@ else
 
 	PLATFORM_FILES := rjd.m
 	PLATFORM_CFLAGS := -fsanitize=undefined -fsanitize=address  
-	PLATFORM_LFLAGS := -framework Foundation -framework AppKit -framework Metal -framework MetalKit
+	PLATFORM_LFLAGS := -framework Foundation -framework AppKit
 
 	OUTPUT_FILE := gen
 endif
