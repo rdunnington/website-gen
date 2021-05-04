@@ -1,6 +1,7 @@
 #Blog
 
-* [2021-04-24: Comparing Aggregate Data](/blog/2021-04-24/page)
+* [2021-5-3: Writing a Static Site Generator](/blog/2021-05-03/page)
+* [2021-4-24: Comparing Aggregate Data](/blog/2021-04-24/page)
 * [2020-10-14: Enforcing Static Strings in Structs](/blog/2020-10-14/page)
 * [2020-9-22: Simple CI in Github](/blog/2020-09-22/page)
 * [2020-9-3: Scoped Resources in C](/blog/2020-09-03/page)
