@@ -17,7 +17,7 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 * Aggressively profiled and optimized memory for many systems in different parts of the engine, saving hundreds of megs that allowed the memory-constrained Xbox One title to ship.
 * Owned all engine-level memory APIs, creating new in-engine and standalone tools for memory analysis, improving existing tracking features, and hooking telemetry support for continuous integration visiblity.
 * Profiled and implemented optimizations for major perf bottlenecks in the asset pipeline's asset metadata system, in some cases shaving hours off nightly build times.
- * Upgraded tools, asset pipeline, and infrastruture to support external studios. Enabled multiple codevelopment partners to be able to work on code and assets worldwide, which before would have been impossible.
+* Upgraded tools, asset pipeline, and infrastruture to support external studios. Enabled multiple codevelopment partners to be able to work on code and assets worldwide, which before would have been impossible.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Dragonstone: Kingdoms</div>
