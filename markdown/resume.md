@@ -13,7 +13,7 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 	<div class="resume-h2-right">Jan 2018 to Present</div>
 </div>
 
-* Ported Slipspace engine to the prerelease Xbox Series X hardware, OS, and SDK, while working with the Xbox platform team in a tight loop of kernel and platform bug feedback, testing, and verification.
+* Ported Slipspace engine and shader compiler pipeline to the prerelease Xbox Series X hardware, OS, and SDK, while working with the platform team in a tight loop of kernel and SDK bug feedback, testing, and verification.
 * Aggressively profiled and optimized memory for many systems in different parts of the engine, saving hundreds of megs that allowed the memory-constrained Xbox One title to ship.
 * Owned all engine-level memory APIs, creating new in-engine and standalone tools for memory analysis, improving existing tracking features, and hooking telemetry support for continuous integration visiblity.
 * Profiled and implemented optimizations for major perf bottlenecks in the asset pipeline's asset metadata system, in some cases shaving hours off nightly build times.
@@ -58,7 +58,7 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 	<div class="resume-h2-right">Oct 2015 to Nov 2015</div>
 </div>
 
-* Gathered publisher requirements, implementing data analytics, ads, and in-app messaging.
+* Gathered publisher requirements, achieving milestones for data analytics, ads, and in-app messaging.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Onyx Engine</div>
@@ -77,24 +77,35 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 	<div class="resume-h1-right">5TH Cell Media</div>
 </div>
 <div class="resume-header">
-	<div class="resume-h2-left">WiiU, 3DS, PC</div>
+	<div class="resume-h2-left">Nintendo WiiU, 3DS, PC</div>
 	<div class="resume-h2-right">Sept 2012 to July 2013</div>
 </div>
 
 * Added and polished features on engine and gameplay systems, optimizing the game on 3DS to run at 30 FPS.
-* Owned and improved designer tool workflows, even fixing an “impossible” bug that cost countless man-hours.
+* Owned and improved designer tool workflows. Fixed an “impossible” tools bug that cost countless man-hours.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Scribblenauts Unlimited</div>
 	<div class="resume-h1-right">5TH Cell Media</div>
 </div>
 <div class="resume-header">
-	<div class="resume-h2-left">WiiU, 3DS, PC</div>
-	<div class="resume-h2-right">Mar 2012 to Sept 2012</div>
+	<div class="resume-h2-left">Nintendo WiiU, 3DS, PC</div>
+	<div class="resume-h2-right">April 2012 to Sept 2012</div>
 </div>
 
 * Implemented features, fixed bugs, and improved stability for a critical E3 demo a month after joining the team.
 * Closely collaborated with artists to realize their UI vision throughout the game on multiple platforms.
+
+<div class="resume-header">
+	<div class="resume-h1-left">Run Roo Run!</div>
+	<div class="resume-h1-right">5TH Cell Media</div>
+</div>
+<div class="resume-header">
+	<div class="resume-h2-left">iOS</div>
+	<div class="resume-h2-right">March 2012 to May 2012</div>
+</div>
+
+* Single-handledly shipped the universal version of the game, adding iCloud save and other bugfixes.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Canceled Mobile Title</div>
@@ -112,11 +123,22 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 	<div class="resume-h1-right">5TH Cell Media</div>
 </div>
 <div class="resume-header">
-	<div class="resume-h2-left">DS</div>
+	<div class="resume-h2-left">Nintendo DS</div>
 	<div class="resume-h2-right">June 2010 to Aug 2010</div>
 </div>
 
 * Independently brought the entire project from inception to ship within two months.
+
+<div class="resume-header">
+	<div class="resume-h1-left">Valencia</div>
+	<div class="resume-h1-right">Yorba Foundation</div>
+</div>
+<div class="resume-header">
+	<div class="resume-h2-left">Linux</div>
+	<div class="resume-h2-right">June 2009 to Aug 2009</div>
+</div>
+
+* Supported and added major features, polished UX, and met inhouse needs for a Vala IDE plugin for Gedit.
 
 ##Education
 <div class="resume-header">
@@ -126,4 +148,3 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 <div class="resume-header">
 	<div class="resume-h2-right">2011</div>
 </div>
-
