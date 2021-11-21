@@ -296,7 +296,7 @@ uint32_t find_html_tag_length(const struct token* t)
 	RJD_ASSERT(t->type == TOKEN_TYPE_TEXT);
 
 	for (uint32_t i = 0; i < t->length; ++i) {
-		if (!isspace(t->text[i])) {
+		if (!isspace((int)t->text[i])) {
 			return i;
 		}
 	}
@@ -336,7 +336,7 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 			next && next->type == TOKEN_TYPE_TEXT)
 		{
 			uint32_t next_length = find_html_tag_length(next);
-			uint32_t length = rjd_math_minu32(html_tag_length, next_length);
+			uint32_t length = rjd_math_min_u32(html_tag_length, next_length);
 
 			if (!strncmp(html_tag->text, next->text, length)) {
 				++tag_count;
@@ -349,7 +349,7 @@ struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream
 			next2 && next2->type == TOKEN_TYPE_TEXT)
 		{
 			uint32_t next2_length = find_html_tag_length(next2);
-			uint32_t length = rjd_math_minu32(html_tag->length, next2_length);
+			uint32_t length = rjd_math_min_u32(html_tag->length, next2_length);
 
 			if (!strncmp(html_tag->text, next2->text, length)) {
 				--tag_count;
