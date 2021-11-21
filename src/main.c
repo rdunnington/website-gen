@@ -641,7 +641,6 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 
 	const char* header_css = "";
 	const char* header_monokai = "";
-	const char* header_gtag = "";
 	const char* header_highlight = "";
 	{
 		struct rjd_strref* ref = NULL;
@@ -659,13 +658,6 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		rjd_strbuf_append(&string, "script/highlight/monokai.css\">");
 		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
 		header_monokai = rjd_strref_str(ref);
-
-		rjd_strbuf_clear(&string);
-		rjd_strbuf_append(&string, "\t<script src=\"");
-		rjd_strbuf_append(&string, path_root);
-		rjd_strbuf_append(&string, "script/gtag.js\"></script>");
-		ref = rjd_strpool_add(&strings, rjd_strbuf_str(&string));
-		header_gtag = rjd_strref_str(ref);
 
 		rjd_strbuf_clear(&string);
 		rjd_strbuf_append(&string, "\t<script src=\"");
@@ -690,8 +682,6 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 		"\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">",
 		header_css,
 		header_monokai,
-		"\t<script async src=\"https://www.googletagmanager.com/gtag/js?id=UA-167453445-1\"></script>",
-		header_gtag,
 		header_highlight,
 		"\t<script>hljs.initHighlightingOnLoad();</script>",
 		"</head>",
