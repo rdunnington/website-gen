@@ -1,6 +1,6 @@
 #Resume
 ##Reuben Dunnington: Software Engineer
-I clarify problems, write simple and resilient code, continually learn and grow, and, above all else, care for my team.
+I clarify problems, write simple and resilient code, continually learn and grow, and care for my team.
 
 ##Experience
 
