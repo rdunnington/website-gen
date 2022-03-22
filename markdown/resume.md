@@ -1,5 +1,5 @@
 #Resume
-##Reuben Dunnington: Software Engineer
+##Reuben Dunnington: Engine Programmer
 I clarify problems, write simple and resilient code, continually learn and grow, and care for my team.
 
 ##Experience
@@ -10,11 +10,11 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 </div>
 <div class="resume-header">
 	<div class="resume-h2-left">Xbox Series X, Xbox One, PC</div>
-	<div class="resume-h2-right">Jan 2018 to Present</div>
+	<div class="resume-h2-right">Jan 2018 to March 2022</div>
 </div>
 
 * Ported Slipspace engine and shader compiler pipeline to the prerelease Xbox Series X hardware, OS, and SDK, while working with the platform team in a tight loop of kernel and SDK bug feedback, testing, and verification.
-* Aggressively profiled and optimized memory for many systems in different parts of the engine, saving hundreds of megs that allowed the memory-constrained Xbox One title to ship.
+* Aggressively profiled and optimized memory for many systems in different parts of the engine, saving hundreds of megs that allowed the memory-constrained Xbox One title to ship and increasing Mean-Time-To-Failure over 4x (46.6 to 197.6 mins).
 * Owned all engine-level memory APIs, creating new in-engine and standalone tools for memory analysis, improving existing tracking features, and hooking telemetry support for continuous integration visiblity.
 * Profiled and implemented optimizations for major perf bottlenecks in the asset pipeline's asset metadata system, in some cases shaving hours off nightly build times.
 * Upgraded tools, asset pipeline, and infrastructure to support external studios. Enabled multiple codevelopment partners to be able to work on code and assets worldwide, which before would have been impossible.
