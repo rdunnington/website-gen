@@ -8,5 +8,5 @@
 * [2020-7-19: Flat Pimpl](/blog/2020-07-19/page)
 * [2020-6-17: George Floyd](/blog/2020-06-17/page)
 * [2020-5-25: Five Resources](/blog/2020-05-25/page)
-* [2020-5-18: Hello World](/blog/2020-5-18/page)
+* [2020-5-18: Hello World](/blog/2020-05-18/page)
 
