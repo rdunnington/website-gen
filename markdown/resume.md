@@ -5,6 +5,23 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 ##Experience
 
 <div class="resume-header">
+	<div class="resume-h1-left">Unannounced FPS Title</div>
+	<div class="resume-h1-right">Team Kaiju</div>
+</div>
+<div class="resume-header">
+	<div class="resume-h2-left">PC</div>
+	<div class="resume-h2-right">March 2022 to Present</div>
+</div>
+
+* Identified and optimized both code and data sources of Unreal game thread perf problems across a variety of different systems. Champion for workflow iteration times, improving PIE performance from 45ms down to 15ms, map load times from 5+ mins to ~30s, and “Heavy PIE” startup times from 30+ mins to less than 1 min.
+* Wrote custom tooling and debug systems to support content creators' specific needs around animation, world building, audio, and gameplay systems, including extending existing Unreal systems with new UI and hotkeys.
+* Owned the full stack of AI locomotion and animation systems, implementing AI-driven, designer-tweakable, custom movement abilities synced with animation in a networked environment.
+* Extended the Houdini Engine for Unreal plugin to leverage native landscape spline curves for procgen roads.
+* Champion for test automation, extending the native Unreal framework to simplify writing tests, creating multiple code and BP-oriented tests to lead by example, and integrated them with our automated Jenkins pipeline.
+* Leveraged Unreal replication and RepGraph, minimizing net traffic while providing a compelling real-time, debuggable experience on the client for gameplay systems such as destruction and AI-oriented functionality.
+* Fixed crashes and critical bugs in various engine-level systems, such as World Partition, Level Instances, UObject, Navigation, Input, Animation, and Gameplay Ability System.
+
+<div class="resume-header">
 	<div class="resume-h1-left">Halo Infinite</div>
 	<div class="resume-h1-right">343 Industries</div>
 </div>
