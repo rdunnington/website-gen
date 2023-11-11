@@ -5,12 +5,23 @@ I clarify problems, write simple and resilient code, continually learn and grow,
 ##Experience
 
 <div class="resume-header">
-	<div class="resume-h1-left">Unannounced FPS Title</div>
+	<div class="resume-h1-left">Unannounced Title</div>
+	<div class="resume-h1-right">Believer Entertainment</div>
+</div>
+<div class="resume-header">
+	<div class="resume-h2-left">PC</div>
+	<div class="resume-h2-right">August 2023 to Present</div>
+</div>
+
+* Working on systems across both engine and infrastructure to support engineering and content creators.
+
+<div class="resume-header">
+	<div class="resume-h1-left">Canceled FPS Title</div>
 	<div class="resume-h1-right">Team Kaiju</div>
 </div>
 <div class="resume-header">
 	<div class="resume-h2-left">PC</div>
-	<div class="resume-h2-right">March 2022 to Present</div>
+	<div class="resume-h2-right">March 2022 to August 2023</div>
 </div>
 
 * Identified and optimized both code and data sources of Unreal game thread perf problems across a variety of different systems. Champion for workflow iteration times, improving PIE performance from 45ms down to 15ms, map load times from 5+ mins to ~30s, and “Heavy PIE” startup times from 30+ mins to less than 1 min.
