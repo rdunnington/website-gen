@@ -18,9 +18,9 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 * Created and drove Unreal upgrade process, coordinating stakeholders across the studio to ensure minimal disruption. "Smoothest engine upgrade I've seen in my career" - Principal Tech Artist Matt Canei.
 * Created optimization plan highlighting effort-to-reward. Implemented character and replication optimizations, bringing single-threaded server frametime down from 54.97ms avg (141ms max) to 21.83ms avg (62ms max).
 * Championed and drove debug menu adoption across the studio. Integrated and [modified Imgui]([newtab] https://github.com/believer-oss/UnrealImGui) to work seamlessly in a client-server environment.
-* Custom OSS [git source control]([newtab] https://github.com/believer-oss/ethos/tree/main/friendshipper) solution for Unreal. UGS parity with game/engine syncing for content creators. Rust-based external tooling. OFPA name translation. Optimizations for [Unreal plugin]([newtab] https://github.com/believer-oss/FriendshipperSourceControl) bringing ops from 20s to 0.5s, and batched locking 1000x faster in DynamoDB (1500s -> 1.5s).
-* From-scratch code testing framework, with Slate UI test runner. Code tests have native coroutine support. Unit, "world", and client-server tests for guaranteeing replicated behavior.
-* OpenTelemetry library integration and [OSS plugin](https://github.com/believer-oss/UnrealOpenTelemetry) featuring spans, metrics, and events. Built-in editor, map, and PIE load timing observability.
+* Custom OSS [git source control]([newtab] https://github.com/believer-oss/ethos/tree/main/friendshipper) solution for Unreal. UGS parity with game/engine syncing for content creators. Rust-based external tooling. OFPA name translation. Optimizations for [Unreal plugin]([newtab] https://github.com/believer-oss/FriendshipperSourceControl) bringing ops from 20s to 0.5s, and batched locking 1000x faster in DynamoDB (1500s to 1.5s).
+* From-scratch [OSS code testing framework]([newtab] https://github.com/believer-oss/Untested), with Slate UI test runner. Code tests have native coroutine support. Unit, "world", and client-server tests for guaranteeing replicated behavior.
+* OpenTelemetry library integration and [OSS plugin]([newtab] https://github.com/believer-oss/UnrealOpenTelemetry) featuring spans, metrics, and events. Built-in editor, map, and PIE load timing observability.
 * Mentored interns, junior, and senior engineers. No gameplay or systems experience to effective Unreal C++ developers in ~6 months. Code reviews, “mob” programming, and quick feedback loops to accelerate learning.
 
 <div class="resume-header">
@@ -32,7 +32,7 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 	<div class="resume-h2-right">March 2022 to August 2023</div>
 </div>
 
-* Identified and optimized both code and data sources of Unreal game thread perf problems across a variety of different systems. Champion for workflow iteration times, improving PIE performance from 45ms down to 15ms, map load times from 5+ mins to ~30s, and out-of-process PIE startup times from 30+ mins to <1 min.
+* Identified and optimized both code and data sources of Unreal game thread perf problems across a variety of different systems. Champion for workflow iteration times, improving PIE performance from 45ms down to 15ms, map load times from 5+ mins to ~30s, and out-of-process PIE startup times from 30+ mins to ~1 min.
 * Wrote custom tooling and debug systems to support content creators' specific needs around animation, world building, audio (Wwise), and gameplay systems. Extended existing Unreal systems with new UI and hotkeys.
 * Owned the full stack of NPC AI, locomotion, and animation systems, implementing behavior tree-driven, designer-tweakable, custom movement abilities synced with animation in a networked environment.
 * Extended the Houdini Engine for Unreal plugin to leverage native landscape spline curves for procgen roads.
@@ -178,26 +178,26 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 
 ##Open Source Experience
 <div class="resume-header">
-	<div class="resume-h1-left">[Orca]([newtab] https://github.com/orca-app/orca)</div>
+	<div class="resume-h1-left">Orca</div>
 </div>
 <div class="resume-header">
 	<div class="resume-h2-left">Windows, MacOS</div>
 	<div class="resume-h2-right">Aug 2023 to Present</div>
 </div>
-* Major contributor to the Orca project, a development platform and runtime environment for cross-platform, sandboxed graphical applications.
+* Major contributor to the [Orca]([newtab] https://github.com/orca-app/orca) project, a development platform and runtime environment for cross-platform, sandboxed graphical applications.
 * Implemented a full C standard library implmentation in terms of Orca APIs to provide a familiar programming environment for C programmers.
 * Provided a complete set of idomatic API bindings to the Zig programming langugage.
 * Replaced raw calls to wasm3 with a custom wasm layer that allows for easy compile-time switching between wasm backends.
 * Platform layer work fixing bugs and bringing Windows to parity with MacOS.
 
 <div class="resume-header">
-	<div class="resume-h1-left">[Bytebox]([newtab] https://github.com/rdunnington/bytebox)</div>
+	<div class="resume-h1-left">Bytebox</div>
 </div>
 <div class="resume-header">
 	<div class="resume-h2-left">Windows, MacOS</div>
 	<div class="resume-h2-right">Oct 2021 to Present</div>
 </div>
-* Primary author and maintainer of a from-scratch WebAssembly interpreter written in Zig, capable of running in standalone mode or embedded as a library.
+* Primary author and maintainer of [Bytebox]([newtab] https://github.com/rdunnington/bytebox), a from-scratch WebAssembly interpreter written in Zig, capable of running in standalone mode or embedded as a library.
 * Fully compliant with the WASM 2.0 spec.
 * Implemented WASI Preview 1 support, an extension that allows WebAssembly programs to interact with objects outside it's sandbox via IO.
 * Debugging interface supports single-stepping, and tracing per-function or per-instruction.
