@@ -19,8 +19,8 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 * Created optimization plan highlighting effort-to-reward. Implemented character and replication optimizations, bringing single-threaded server frametime down from 54.97ms avg (141ms max) to 21.83ms avg (62ms max).
 * Championed and drove debug menu adoption across the studio. Integrated and [modified Imgui]([newtab] https://github.com/believer-oss/UnrealImGui) to work seamlessly in a client-server environment.
 * Custom OSS [git source control]([newtab] https://github.com/believer-oss/ethos/tree/main/friendshipper) solution for Unreal. UGS parity with game/engine syncing for content creators. Rust-based external tooling. OFPA name translation. Optimizations for [Unreal plugin]([newtab] https://github.com/believer-oss/FriendshipperSourceControl) bringing ops from 20s to 0.5s, and batched locking 1000x faster in DynamoDB (1500s to 1.5s).
-* From-scratch code testing framework, with Slate UI test runner. Code tests have native coroutine support. Unit, "world", and client-server tests for guaranteeing replicated behavior.
-* OpenTelemetry library integration and [OSS plugin](https://github.com/believer-oss/UnrealOpenTelemetry) featuring spans, metrics, and events. Built-in editor, map, and PIE load timing observability.
+* From-scratch [OSS code testing framework]([newtab] https://github.com/believer-oss/Untested), with Slate UI test runner. Code tests have native coroutine support. Unit, "world", and client-server tests for guaranteeing replicated behavior.
+* OpenTelemetry library integration and [OSS plugin]([newtab] https://github.com/believer-oss/UnrealOpenTelemetry) featuring spans, metrics, and events. Built-in editor, map, and PIE load timing observability.
 * Mentored interns, junior, and senior engineers. No gameplay or systems experience to effective Unreal C++ developers in ~6 months. Code reviews, “mob” programming, and quick feedback loops to accelerate learning.
 
 <div class="resume-header">
