@@ -56,9 +56,15 @@ struct token_stream
 	int32_t indent;
 };
 
+enum paragraph_position
+{
+	PARAGRAPH_POSITION_ROOT,
+	PARAGRAPH_POSITION_INLINE,
+};
 
 void append_indent(struct rjd_strbuf* out, const struct token_stream* stream);
 bool peek_token(const struct token_stream* stream, enum token_type type);
+bool stream_finished(const struct token_stream* stream);
 struct rjd_result advance_token(struct token_stream* stream);
 struct rjd_result consume_token(struct token_stream* stream, enum token_type type);
 struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream);
@@ -68,7 +74,7 @@ struct rjd_result parse_list(struct rjd_strbuf* out, struct token_stream* stream
 struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream);
 struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream);
 struct rjd_result parse_quote(struct rjd_strbuf* out, struct token_stream* stream); 
-struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream); 
+struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream, enum paragraph_position paragraph_position); 
 
 void append_indent(struct rjd_strbuf* out, const struct token_stream* stream)
 {
@@ -98,13 +104,19 @@ void append_token_text(struct rjd_strbuf* out, const struct token* t)
 	}
 }
 
+bool stream_finished(const struct token_stream* stream)
+{
+	if (stream->cursor >= rjd_array_count(stream->tokens)) {
+		return true;
+	}
+	return false;
+}
 
 bool peek_token(const struct token_stream* stream, enum token_type type)
 {
 	uint32_t cursor = stream->cursor + 1;
-
 	if (cursor >= rjd_array_count(stream->tokens)) {
-		return false;
+		return true;
 	}
 	if (stream->tokens[cursor].type != type) {
 		return false;
@@ -134,7 +146,7 @@ struct rjd_result consume_token(struct token_stream* stream, enum token_type typ
 struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream)
 {
 	bool consuming = true;
-	while (consuming)
+	while (consuming && !stream_finished(stream))
 	{
 		const struct token* t = stream->tokens + stream->cursor;
 		switch (t->type)
@@ -151,7 +163,7 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 				RJD_RESULT_PROMOTE(parse_link(out, stream));
 				break;
 			case TOKEN_TYPE_BACKTICK:
-				RJD_RESULT_PROMOTE(parse_code(out, stream));
+				RJD_RESULT_PROMOTE(parse_code(out, stream, PARAGRAPH_POSITION_INLINE));
 				break;
 			default:
 				consuming = false;
@@ -167,7 +179,11 @@ struct rjd_result parse_paragraph(struct rjd_strbuf* out, struct token_stream* s
 {
 	append_indent(out, stream);
 
-	bool is_plain_text = stream->tokens[stream->cursor].type == TOKEN_TYPE_TEXT;
+	// Backticks count as plain text because if we've landed in this case with a backtick, we're
+	// going to make an inline code span.
+	bool is_plain_text = 
+		stream->tokens[stream->cursor].type == TOKEN_TYPE_TEXT ||
+		stream->tokens[stream->cursor].type == TOKEN_TYPE_BACKTICK;
 
 	if (is_plain_text) {
 		rjd_strbuf_append(out, "<p>");
@@ -248,11 +264,15 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 	RJD_ASSERT(t->type == TOKEN_TYPE_SQUARE_BRACKET_OPEN);
 
 	bool open_new_tab = false;
-	const struct token* text = NULL;
+	const struct token* link_text_start = t + 1;
 
-	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_TEXT));
-	text = stream->tokens + stream->cursor;
+	while (!peek_token(stream, TOKEN_TYPE_SQUARE_BRACKET_CLOSE)) {
+		advance_token(stream);
+	}
 	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_SQUARE_BRACKET_CLOSE));
+
+	const struct token* link_text_end = stream->tokens + stream->cursor;
+
 	RJD_RESULT_PROMOTE(consume_token(stream, TOKEN_TYPE_PAREN_OPEN));
 
 	if (peek_token(stream, TOKEN_TYPE_SQUARE_BRACKET_OPEN)) {
@@ -285,7 +305,7 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 		rjd_strbuf_append(out, " target=\"_blank\"");
 	}
 	rjd_strbuf_append(out, ">");
-	rjd_strbuf_appendl(out, text->text, text->length);
+	rjd_strbuf_appendl(out, link_text_start->text, (uint32_t)(link_text_end->text - link_text_start->text));
 	rjd_strbuf_append(out, "</a>");
 
 	return RJD_RESULT_OK();
@@ -419,33 +439,44 @@ struct rjd_result parse_quote(struct rjd_strbuf* out, struct token_stream* strea
 	return RJD_RESULT_OK();
 }
 
-struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream)
+struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream, enum paragraph_position paragraph_position)
 {
 	const struct token* t = stream->tokens + stream->cursor;
 	RJD_ASSERT(t->type == TOKEN_TYPE_BACKTICK);
 
-	const struct rjd_result result_invalid_multiline_token = RJD_RESULT("Multiline token is 3 backticks on its own line.");
+	const struct rjd_result result_missing_multiline_token = RJD_RESULT("Multiline token is 3 backticks on its own line, with an optional (unused) language text token.");
 
 	bool multiline = false;
 	if (peek_token(stream, TOKEN_TYPE_BACKTICK)) {
 		advance_token(stream);
 		if (peek_token(stream, TOKEN_TYPE_BACKTICK)) {
 			advance_token(stream);
+
+			// consume optional language token
+			if (peek_token(stream, TOKEN_TYPE_TEXT)) {
+				advance_token(stream);
+			}
+
 			if (peek_token(stream, TOKEN_TYPE_NEWLINE)) {
 				advance_token(stream);
 				multiline = true;
 			} else {
-				return result_invalid_multiline_token;
+				return result_missing_multiline_token;
 			}
 		} else {
-			return result_invalid_multiline_token;
+			return result_missing_multiline_token;
 		}
 	}
 
 	if (multiline) {
 		append_indent(out, stream);
 		rjd_strbuf_append(out, "<pre><code>");
+	} else if (paragraph_position == PARAGRAPH_POSITION_ROOT) {
+		// this is an inline code block, but we haven't started a paragraph yet, so start one
+		// now and let the inner parsing code recurse into this function
+		return parse_paragraph(out, stream);
 	} else {
+		RJD_ASSERT(paragraph_position == PARAGRAPH_POSITION_INLINE);
 		rjd_strbuf_append(out, "<span class=\"inline-code\">");
 	}
 
@@ -467,10 +498,10 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 				if (peek_token(stream, TOKEN_TYPE_NEWLINE)) {
 					advance_token(stream);
 				} else {
-					return result_invalid_multiline_token;
+					return result_missing_multiline_token;
 				}
 			} else {
-				return result_invalid_multiline_token;
+				return result_missing_multiline_token;
 			}
 		}
 
@@ -561,7 +592,9 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 				}
 				++next;
 			}
-			t.length = next - t.text;
+
+			RJD_ASSERT(next > t.text);
+			t.length = (uint32_t)(next - t.text);
 			break;
 		}
 
@@ -609,7 +642,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 				result = parse_quote(&string, &stream);
 				break;
 			case TOKEN_TYPE_BACKTICK:
-				result = parse_code(&string, &stream);
+				result = parse_code(&string, &stream, PARAGRAPH_POSITION_ROOT);
 				break;
 			default:
 				result = RJD_RESULT("unexpected token at top level");
@@ -786,21 +819,17 @@ int main(int argc, const char** argv)
 			}
 
 			const char* path_output_str = rjd_path_get(&path_output);
+			printf("transform %s -> %s\n", path_input, path_output_str);
+
 			struct rjd_result r = transform_markdown_file(path_input, path_output_str, rjd_path_get(&to_root), &alloc);
-			if (rjd_result_isok(r)) {
-				printf("transform %s -> %s\n", path_input, path_output_str);
-			} else {
+			if (rjd_result_isok(r) == false) {
 				printf("Markdown error in file '%s': %s\n", path_input, r.error);
 			}
 		} else {
-			if (RJD_PLATFORM_WINDOWS) {
-				rjd_strbuf_append(&system_command, "copy /y %s %s", path_input, rjd_path_get(&path_output));
-			} else {
-				struct rjd_path folder = rjd_path_init_with(rjd_path_get(&path_output));
-				rjd_path_pop(&folder);
-				rjd_fio_mkdir(rjd_path_get(&folder));
-				rjd_strbuf_append(&system_command, "cp -R %s %s", path_input, rjd_path_get(&path_output));
-			}
+			struct rjd_path folder = rjd_path_init_with(rjd_path_get(&path_output));
+			rjd_path_pop(&folder);
+			rjd_fio_mkdir(rjd_path_get(&folder));
+			rjd_strbuf_append(&system_command, "cp -R %s %s", path_input, rjd_path_get(&path_output));
 
 			printf("%s\n", rjd_strbuf_str(&system_command));
 			system(rjd_strbuf_str(&system_command));
