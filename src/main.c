@@ -21,6 +21,7 @@ enum token_type
 	TOKEN_TYPE_ANGLE_BRACKET_CLOSE,
 	TOKEN_TYPE_SLASH_FORWARD,
 	TOKEN_TYPE_BACKTICK,
+	TOKEN_TYPE_UNDERSCORE,
 	TOKEN_TYPE_COUNT,
 };
 
@@ -38,6 +39,7 @@ const char TOKEN_SYMBOLS[] =
 	'>',
 	'/',
 	'`',
+	'_',
 };
 RJD_STATIC_ASSERT(rjd_countof(TOKEN_SYMBOLS) == TOKEN_TYPE_COUNT);
 
@@ -75,6 +77,7 @@ struct rjd_result parse_link(struct rjd_strbuf* out, struct token_stream* stream
 struct rjd_result parse_html(struct rjd_strbuf* out, struct token_stream* stream);
 struct rjd_result parse_quote(struct rjd_strbuf* out, struct token_stream* stream); 
 struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream, enum paragraph_position paragraph_position); 
+struct rjd_result parse_emphasis(struct rjd_strbuf* out, struct token_stream* stream);
 
 void append_indent(struct rjd_strbuf* out, const struct token_stream* stream)
 {
@@ -165,6 +168,9 @@ struct rjd_result parse_text(struct rjd_strbuf* out, struct token_stream* stream
 			case TOKEN_TYPE_BACKTICK:
 				RJD_RESULT_PROMOTE(parse_code(out, stream, PARAGRAPH_POSITION_INLINE));
 				break;
+			case TOKEN_TYPE_UNDERSCORE:
+				RJD_RESULT_PROMOTE(parse_emphasis(out, stream));
+				break;
 			default:
 				consuming = false;
 				break;
@@ -183,7 +189,8 @@ struct rjd_result parse_paragraph(struct rjd_strbuf* out, struct token_stream* s
 	// going to make an inline code span.
 	bool is_plain_text = 
 		stream->tokens[stream->cursor].type == TOKEN_TYPE_TEXT ||
-		stream->tokens[stream->cursor].type == TOKEN_TYPE_BACKTICK;
+		stream->tokens[stream->cursor].type == TOKEN_TYPE_BACKTICK ||
+		stream->tokens[stream->cursor].type == TOKEN_TYPE_UNDERSCORE;
 
 	if (is_plain_text) {
 		rjd_strbuf_append(out, "<p>");
@@ -483,8 +490,7 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 	RJD_RESULT_PROMOTE(advance_token(stream));
 	t = stream->tokens + stream->cursor;
 
-	while (t->type != TOKEN_TYPE_BACKTICK)
-	{
+	while (t->type != TOKEN_TYPE_BACKTICK) {
 		append_token_text(out, t);
 		RJD_RESULT_PROMOTE(advance_token(stream));
 		t = stream->tokens + stream->cursor;
@@ -508,6 +514,64 @@ struct rjd_result parse_code(struct rjd_strbuf* out, struct token_stream* stream
 		rjd_strbuf_append(out, "</code></pre>\n");
 	} else {
 		rjd_strbuf_append(out, "</span>");
+	}
+
+	return RJD_RESULT_OK();
+}
+
+enum emphasis
+{
+	EMPHASIS_ITALICS,
+	EMPHASIS_BOLD,
+	EMPHASIS_ITALICS_BOLD,
+	EMPHASIS_COUNT,
+};
+
+struct rjd_result parse_emphasis(struct rjd_strbuf* out, struct token_stream* stream)
+{
+	const struct token* t = stream->tokens + stream->cursor;
+	RJD_ASSERT(t->type == TOKEN_TYPE_UNDERSCORE);
+
+	// this underscore is in the middle of a word so it can't be emphasis
+	if (t != stream->tokens && isalpha(*(t->text - 1))) {
+		rjd_strbuf_appendl(out, t->text, t->length);
+		return RJD_RESULT_OK();
+	}
+
+	enum emphasis emphasis = EMPHASIS_ITALICS;
+	while (rjd_result_isok(consume_token(stream, TOKEN_TYPE_UNDERSCORE))) {
+		++emphasis;
+	}
+
+	static const char* style_texts[] = 
+	{
+		"text-emphasis-1",
+		"text-emphasis-2",
+		"text-emphasis-3",
+	};
+	RJD_STATIC_ASSERT(rjd_countof(style_texts) == EMPHASIS_COUNT);
+
+	rjd_strbuf_append(out, "<span class=\"");
+	rjd_strbuf_append(out, style_texts[emphasis]);
+	rjd_strbuf_append(out, "\">");
+
+	t = stream->tokens + stream->cursor;
+	while (t->type != TOKEN_TYPE_UNDERSCORE) {
+		append_token_text(out, t);
+		RJD_RESULT_PROMOTE(advance_token(stream));
+		t = stream->tokens + stream->cursor;
+	}
+
+	rjd_strbuf_append(out, "</span>");
+
+	enum emphasis end_emphasis = EMPHASIS_ITALICS;
+	while (peek_token(stream, TOKEN_TYPE_UNDERSCORE)) {
+		advance_token(stream);
+		++end_emphasis;
+	}
+
+	if (emphasis != end_emphasis) {
+		return RJD_RESULT("Emphasis begin/end mismatch");
 	}
 
 	return RJD_RESULT_OK();
@@ -578,6 +642,10 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 			t.type = TOKEN_TYPE_BACKTICK;
 			++next;
 			break;
+		case '_':
+			t.type = TOKEN_TYPE_UNDERSCORE;
+			++next;
+			break;
 		default:
 			while (next < end) {
 				bool end_token = false;
@@ -627,6 +695,7 @@ struct rjd_result transform_markdown_file(const char* path_md, const char* path_
 				break;
 			case TOKEN_TYPE_TEXT:
 			case TOKEN_TYPE_SQUARE_BRACKET_OPEN:
+			case TOKEN_TYPE_UNDERSCORE:
 				result = parse_paragraph(&string, &stream);
 				break;
 			case TOKEN_TYPE_HASH:

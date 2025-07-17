@@ -28,6 +28,22 @@ img
 	margin-right: auto;
 }
 
+.text-emphasis-1
+{
+	font-style: italic;
+}
+
+.text-emphasis-2
+{
+	font-weight: bold;
+}
+
+.text-emphasis-3
+{
+	font-weight: bold;
+	font-style: italic;
+}
+
 .spaced-list ul li
 {
 	padding: 4px;
