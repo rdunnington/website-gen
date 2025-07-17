@@ -23,7 +23,9 @@ body
 img
 {
 	max-width: 600px;
-	border: 2px solid #eba613;
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
 }
 
 .spaced-list ul li
