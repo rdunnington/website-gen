@@ -10,7 +10,7 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 </div>
 <div class="resume-header">
 	<div class="resume-h2-left">PC, iOS</div>
-	<div class="resume-h2-right">August 2023 to Present</div>
+	<div class="resume-h2-right">August 2023 to June 2025</div>
 </div>
 
 * Developed technical interview process for systems engineers and made key hires. Cross-team systems eng meeting, driving quality, performance, scaling, identifying problems with systems, process, and workflow.
@@ -21,7 +21,8 @@ Empathetic, intrinsically motivated generalist. Building performant, scalable sy
 * Custom OSS [git source control]([newtab] https://github.com/believer-oss/ethos/tree/main/friendshipper) solution for Unreal. UGS parity with game/engine syncing for content creators. Rust-based external tooling. OFPA name translation. Optimizations for [Unreal plugin]([newtab] https://github.com/believer-oss/FriendshipperSourceControl) bringing ops from 20s to 0.5s, and batched locking 1000x faster in DynamoDB (1500s to 1.5s).
 * From-scratch [OSS code testing framework]([newtab] https://github.com/believer-oss/Untested), with Slate UI test runner. Code tests have native coroutine support. Unit, "world", and client-server tests for guaranteeing replicated behavior.
 * OpenTelemetry library integration and [OSS plugin]([newtab] https://github.com/believer-oss/UnrealOpenTelemetry) featuring spans, metrics, and events. Built-in editor, map, and PIE load timing observability.
-* Mentored interns, junior, and senior engineers. No gameplay or systems experience to effective Unreal C++ developers in ~6 months. Code reviews, “mob” programming, and quick feedback loops to accelerate learning.
+* Mentored intern, junior, and senior engineers. No gameplay or systems experience to effective Unreal C++ developers in ~6 months. Code reviews, “mob” programming, and quick feedback loops to accelerate learning.
+* Support for LearningAgents and engine changes to support scaling headless training.
 
 <div class="resume-header">
 	<div class="resume-h1-left">Canceled PvEvP FPS</div>
